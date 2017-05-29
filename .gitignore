@@ -1,3 +1,6 @@
 table.txt 
 table2.txt 
 log.txt
+build
+*.so
+*.c
