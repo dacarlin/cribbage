@@ -32,10 +32,12 @@ def count( players, turn ):
             if len([n for n in current_player.hand if not n.ontable]) == 0:
                 # no cards
                 print('Current player has no cards')
+                turn = turn^1
                 break
             if all([count+c>31 for c in [n for n in current_player.hand if not n.ontable]]):
                 # no legal play
                 print('Current player has no legal move: "Go!"')
+                turn = turn^1
                 break
 
             # actually do the turn
@@ -51,6 +53,7 @@ def count( players, turn ):
             s = score_count(plays)
             print("Score for the play is", s, "to", current_player)
             current_player.peg(s)
+
             turn = turn^1
 
         # do we still have cards?
@@ -102,7 +105,7 @@ def game_with_gui(players):
         # run the counting sub-game
         # players get scored in-game
         count(players, turn)
-        print("Scores:", [(player, player.score) for player in players])
+        print("Scores after counting", [(player, player.score) for player in players])
 
         # "turn" card and final scoring
         # add nibs and nobs!
@@ -112,7 +115,7 @@ def game_with_gui(players):
         players[turn].score += crib_s
 
         print('That is the end of hand {}'.format(hands, ))
-        print("Scores:", [(player, player.score) for player in players])
+        print("Scores after hands", [(player, player.score) for player in players])
 
     # end of game (one player has > 121 points)
     return_val = [ player.score for player in players ]
