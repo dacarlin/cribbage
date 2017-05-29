@@ -41,7 +41,7 @@ def count( players, turn ):
         # actually do the turn
         done = None
         while not done:
-            card = current_player.ask_for_input()
+            card = current_player.ask_for_input(plays)
             if count + card < 32:
                 done = True
 
@@ -76,6 +76,7 @@ def game_with_gui(players):
 
         # ask players for thier discards
         crib = discards(players)
+        print("Crib:", crib)
 
         # calculate scores (but do not assign yet)
         turn_card = deck.draw(1)
