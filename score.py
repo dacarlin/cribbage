@@ -28,6 +28,10 @@ def score( hand ):
                 break
             break
 
+    # all same suit
+
+    # right jack?
+
     return points
 
 
@@ -35,8 +39,17 @@ def score_count(plays):
     '''
     Score the table, from the point of view of the last-played card
     '''
+
+    if len(plays) < 2:
+        return 0
+
     score = 0
-    count = sum([n.value for n in plays])
+    count = sum(plays)
     if count == 15 or count == 31:
-        score = 2
+        score += 2
+
+    if plays[-1] == plays[-2]:
+        score += 2
+        # also implement triples!
+
     return score

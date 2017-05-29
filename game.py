@@ -1,10 +1,6 @@
-# coding: utf-8
-
 from score import score, score_count
 from card import Deck
 import numpy as np
-
-# game mechanincs
 
 def discards( players ):
     crib = []
@@ -14,43 +10,60 @@ def discards( players ):
             crib.append(c)
     return crib
 
+def count( players, turn ):
+    '''
+    The counting game. Two loops. Inner loop is us counting to 31,
+    outer loop runs until we run out of cards
+    '''
+
+    while True:
+        # we are in counting phase
+
+        plays = []
+        while True:
+            # we are couting to 31
+            current_player = players[turn^1]
+            count = sum(plays)
+
+            # state of current player
+            print('current player:', current_player)
+            if len(current_player.hand) == 0:
+                # no cards
+                print('Current player has no cards')
+                break
+            if all([count+c>31 for c in current_player.hand]):
+                # no legal play
+                print('Current player has no legal move: "Go!"')
+                break
+
+            # actually do the turn
+            done = None
+            while not done:
+                card = current_player.ask_for_input(plays)
+                if count + card < 32:
+                    card.ontable = True
+                    done = True
+
+            plays.append(card)
+            print("Player {} played {}".format( current_player, card))
+            s = score_count(plays)
+            print("Score for the play is", s, "to", current_player)
+            current_player.peg(s)
+            turn = turn^1
+
+        # do we still have cards?
+        # if so, we want to keep going
+        if all([len(player.hand) < 1 for player in players]):
+            # no players have cards
+            break
+
+        # otherwise, continue to another game of counting to 31
+
 def scoring(players, turn_card):
     # goes with "score" function
     for player in players:
         pool = player.hand + turn_card
         player.score += score(pool)
-
-def count( players, turn ):
-
-    plays = []
-    while True:
-        # start of turn
-        current_player = players[turn^1]
-        count = sum(plays)
-
-        # state of current player
-        print('current player:', current_player)
-        if len(current_player.hand) == 0:
-            # no cards
-            break
-        if all([count+c>31 for c in current_player.hand]):
-            # no legal play
-            print('go')
-            break
-
-        # actually do the turn
-        done = None
-        while not done:
-            card = current_player.ask_for_input(plays)
-            if count + card < 32:
-                done = True
-
-        current_player.hand = [n for n in current_player.hand if n != card]
-        print(current_player, 'hand:', current_player.hand)
-
-        # end of turn
-        turn = turn^1
-
 
 def game_with_gui(players):
 
@@ -87,6 +100,7 @@ def game_with_gui(players):
         # run the counting sub-game
         # players get scored in-game
         count(players, turn)
+        print("Scores:", [(player, player.score) for player in players])
 
         # "turn" card and final scoring
         # add nibs and nobs!
@@ -96,6 +110,7 @@ def game_with_gui(players):
         players[turn].score += crib_s
 
         print('That is the end of hand {}'.format(hands, ))
+        print("Scores:", [(player, player.score) for player in players])
 
     # end of game (one player has > 121 points)
     return_val = [ player.score for player in players ]
