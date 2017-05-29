@@ -10,7 +10,7 @@ def score( hand ):
     # fifteens
     for vector_length in [ 2, 3, 4, 5 ]:
         for vector in combinations( hand, vector_length ):
-            if sum( [ card.value for card in vector ] ) == 15:
+            if sum(vector) == 15:
                 points += 2
 
     # pairs (not necessary to account for more than pairs for ==)

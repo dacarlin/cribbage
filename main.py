@@ -6,7 +6,7 @@ def main():
 
     parser = ArgumentParser()
     parser.add_argument('--ai', help='Enable AI player (default is nondeterministic (random) player)')
-    parser.add_argument('--name', help='Debugging mode')
+    parser.add_argument('--ai_vs_ai', help="Pit two AIs against each other")
     args = parser.parse_args()
 
     pone_name = "Jeff" # random name?
@@ -17,12 +17,14 @@ def main():
     # if len(name) == 0:
     #   name = default
 
-
     name = default # debugging!
-    
+
     players = (HumanPlayer(name), NondeterministicAIPlayer(pone_name))
     if args.ai:
         players = (HumanPlayer(name), AIPlayer("Amy"))
+    if args.ai_vs_ai:
+        players = (AIPlayer("Amy"), AIPlayer("Andrew"))
+
     scores = game_with_gui(players)
 
     # now, by definition, the game is over

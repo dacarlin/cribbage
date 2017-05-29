@@ -27,6 +27,11 @@ class Player():
     def sorted_hand(self):
         return sorted(self.hand, key=lambda c: c.value)
 
+    @property
+    def in_hand(self):
+        'Cards in my hand that are not on the table'
+        return [card for card in self.hand if not card.ontable]
+
     def clean( self ):
         self.hand = []
         self.score = 0
@@ -55,30 +60,32 @@ class NondeterministicAIPlayer(Player):
 
 class HumanPlayer(Player):
 
-    def show_hand(self):
-      print(' '.join([str(n) for n in self.sorted_hand if not n.ontable]))
-
     def ask_for_input(self, play_vector):
-        print('Play vector:', play_vector, '({})'.format(sum(play_vector)))
+        '''
+        Ask a human for a card, in the counting phase
+        '''
 
-        d = dict(enumerate([n for n in self.hand if not n.ontable],1))
+        print('Play vector:', play_vector, '({})'.format(sum(play_vector)))
+        count = sum(play_vector)
+        d = dict(enumerate(self.in_hand,1))
         print(d)
 
         discard_prompt = 'Choose a card to play: '
-        done = None
-        while not done:
+        while 1:
             inp = input(discard_prompt)
             if len(inp) > 0 and int(inp) in d.keys():
                 card = d[int(inp)]
-                print('Selected', card)
-                card.ontable = True
-                return card
+                if count + card < 31:
+                    card.ontable = True
+                    return card
 
     def ask_for_discards( self ):
-        self.show_hand()
+        '''After deal, ask a human for a card'''
+
+        print(self.sorted_hand)
         d = dict(enumerate(self.sorted_hand,1))
         discard_prompt = 'Choose two cards (numbered 1-6) for the crib: '
-        inp = input( discard_prompt )
+        inp = input( discard_prompt ) or '12'
         cards = [ d[int(i)] for i in inp.replace(' ','') ]
         self.hand = [ n for n in self.hand if n not in cards ]
         print( 'Discarded {} {} to crib'.format(*cards) )
@@ -102,35 +109,29 @@ class AIPlayer(Player):
         what you know about the oppontent
 
         '''
-
-
-        max_levels = 50
-
-        print("Amy is beginning to think about discards")
+        max_levels = 100
+        print("Amy is deciding on discard with thoroughness {}".format(max_levels))
 
         biggest_total = (-np.inf, None) #score, cards
         for i, j in combinations(self.hand, 2):
-            # score my hands
-            combo_score = score([n for n in self.hand if n != i and n != j])
 
-            # bayses approach
-            prior = [1 for n in range(52)] # uniform prior (not normalized yet)
-            deck = Deck()
-            deck.shuffle()
-            deck = list(deck.draw(52))
-            dist = zip(prior, deck)
+            # score my hands
+            pot_hand = [n for n in self.hand if n != i and n != j]
+            indexes = [n.index for n in pot_hand]
+            combo_score = score(pot_hand)
 
             # brute force approach
-            possible_scores = []
+            deck = Deck()
+            deck.shuffle()
+            deck = [n for n in list(deck.draw(52)) if n.index not in indexes]
             levels = 0
-            for p, q, r in combinations(deck, 3):
+            possible_scores = []
+            for pot_three in combinations(deck, 3):
                 levels += 1
                 if levels < max_levels:
-                    if p != i and q != i and r != i and p != j and q != j and r != j:
-                        hand = i, j, p, q, r
-                        possible_scores.append(score(hand))
+                    hand = pot_hand + list(pot_three)
+                    possible_scores.append(score(hand))
             possible_scores = np.array(possible_scores)
-
             total = combo_score - possible_scores.mean()
             total_pkg = (total, [i,j])
             if total > biggest_total[0]:
