@@ -26,12 +26,14 @@ def count( players, turn ):
             count = sum(plays)
 
             # state of current player
+            if count == 31:
+                break
             print('current player:', current_player)
-            if len(current_player.hand) == 0:
+            if len([n for n in current_player.hand if not n.ontable]) == 0:
                 # no cards
                 print('Current player has no cards')
                 break
-            if all([count+c>31 for c in current_player.hand]):
+            if all([count+c>31 for c in [n for n in current_player.hand if not n.ontable]]):
                 # no legal play
                 print('Current player has no legal move: "Go!"')
                 break
@@ -45,7 +47,7 @@ def count( players, turn ):
                     done = True
 
             plays.append(card)
-            print("Player {} played {}".format( current_player, card))
+            print("Player {} played {} ({})".format( current_player, card, count+card))
             s = score_count(plays)
             print("Score for the play is", s, "to", current_player)
             current_player.peg(s)
@@ -53,7 +55,7 @@ def count( players, turn ):
 
         # do we still have cards?
         # if so, we want to keep going
-        if all([len(player.hand) < 1 for player in players]):
+        if all([len([n for n in player.hand if not n.ontable]) < 1 for player in players]):
             # no players have cards
             break
 

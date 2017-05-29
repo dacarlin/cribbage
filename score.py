@@ -37,10 +37,10 @@ def score( hand ):
 
 def score_count(plays):
     '''
-    Score the table, from the point of view of the last-played card
+    Score a play vector
     '''
 
-    if len(plays) < 2:
+    if not plays or len(plays) < 2:
         return 0
 
     score = 0
@@ -48,7 +48,7 @@ def score_count(plays):
     if count == 15 or count == 31:
         score += 2
 
-    if plays[-1] == plays[-2]:
+    if plays[-1].rank == plays[-2].rank:
         score += 2
         # also implement triples!
 

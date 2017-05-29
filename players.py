@@ -61,7 +61,7 @@ class HumanPlayer(Player):
     def ask_for_input(self, play_vector):
         print('Play vector:', play_vector, '({})'.format(sum(play_vector)))
 
-        d = dict(enumerate(self.hand,1))
+        d = dict(enumerate([n for n in self.hand if not n.ontable],1))
         print(d)
 
         discard_prompt = 'Choose a card to play: '
@@ -156,15 +156,17 @@ class AIPlayer(Player):
         print("Amy is deciding which card to play")
         print("Play vector:", play_vector)
         cards = [n for n in self.hand if not n.ontable]
+        print("Cards:", cards)
         biggest_score = (-np.inf, None)
-        for i in cards:
-            pool = play_vector.append(i)
+        for card in cards:
+            pool = play_vector + [card]
+            cnt = sum(pool)
             my_score = score_count(pool)
-            print('Playing', i, 'gives pool', pool, 'and score', my_score )
+            print('Playing', card, 'gives pool', pool, 'count', cnt, 'and score', my_score )
             if my_score > biggest_score[0]:
-                biggest_score = (my_score, i)
+                biggest_score = (my_score, card)
 
-        card = i
+        card = biggest_score[1]
         print("Amy choose", card)
         card.ontable = True
         return card # one card from self.hand
