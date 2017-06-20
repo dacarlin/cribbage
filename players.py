@@ -39,20 +39,17 @@ class Player():
     def peg( self, points ):
         self.score += points
 
-    def __repr__( self ):
-        if len(self.name) > 0:
-            return self.name
-        return 'Unnamed'
-
 class NondeterministicAIPlayer(Player):
     '''
     A player who plays randomly from legal moves
     '''
+
     def ask_for_input(self, play_vector):
         # ignore play vector
-        card = np.random.choice(self.hand)
+        card = np.random.choice(self.in_hand)
         card.ontable = True
         return card
+
     def ask_for_discards(self):
         cards = self.hand[0:2]
         self.hand = [ n for n in self.hand if n not in cards ]
@@ -91,7 +88,7 @@ class HumanPlayer(Player):
         print( 'Discarded {} {} to crib'.format(*cards) )
         return cards
 
-class AIPlayer(Player):
+class EnumerativeAIPlayer(Player):
     '''
     AI player
     '''
@@ -110,7 +107,8 @@ class AIPlayer(Player):
 
         '''
         max_levels = 100
-        print("Amy is deciding on discard with thoroughness {}".format(max_levels))
+        possible = 10000
+        print("Amy is deciding on discard with thoroughness {}/1.0".format(max_levels/possible))
 
         biggest_total = (-np.inf, None) #score, cards
         for i, j in combinations(self.hand, 2):
@@ -137,8 +135,8 @@ class AIPlayer(Player):
             if total > biggest_total[0]:
                 biggest_total = total_pkg
 
-            print('Discarding', i, j, '=', combo_score, 'for me',
-                'and {0:2.2f} ± {1:2.2f} for you'.format(possible_scores.mean(), possible_scores.std()))
+            #print('Discarding', i, j, '=', combo_score, 'for me',
+            #    'and {0:2.2f} ± {1:2.2f} for you'.format(possible_scores.mean(), possible_scores.std()))
 
         best_score, cards = biggest_total
         print("Choosing best score", best_score, "by discarding", cards)
@@ -154,16 +152,16 @@ class AIPlayer(Player):
         and choose the one that maximizes the points
         '''
 
-        print("Amy is deciding which card to play")
-        print("Play vector:", play_vector)
+        #print("Amy is deciding which card to play")
+        #print("Play vector:", play_vector)
         cards = [n for n in self.hand if not n.ontable]
-        print("Cards:", cards)
+        #print("Cards:", cards)
         biggest_score = (-np.inf, None)
         for card in cards:
             pool = play_vector + [card]
             cnt = sum(pool)
             my_score = score_count(pool)
-            print('Playing', card, 'gives pool', pool, 'count', cnt, 'and score', my_score )
+            #print('Playing', card, 'gives pool', pool, 'count', cnt, 'and score', my_score )
             if my_score > biggest_score[0]:
                 biggest_score = (my_score, card)
 

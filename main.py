@@ -1,37 +1,24 @@
 from game import game_with_gui
 from argparse import ArgumentParser
-from players import HumanPlayer, NondeterministicAIPlayer, AIPlayer
+from players import HumanPlayer, NondeterministicAIPlayer, EnumerativeAIPlayer
+
+player_choices = {
+    'human': HumanPlayer(),
+    'ai': EnumerativeAIPlayer(),
+    'random': NondeterministicAIPlayer(),
+}
+
+parser = ArgumentParser()
+parser.add_argument('--player1', help='Player 1', choices=player_choices)
+parser.add_argument('--player2', help='Player 2', choices=player_choices)
+parser.add_argument('--debug', help="Enable debugging mode")
+args = parser.parse_args()
 
 def main():
 
-    parser = ArgumentParser()
-    parser.add_argument('--ai', help='Enable AI player (default is nondeterministic (random) player)')
-    parser.add_argument('--ai_vs_ai', help="Pit two AIs against each other")
-    args = parser.parse_args()
-
-    pone_name = "Jeff" # random name?
-    default = 'Human'
-    #intro = '''Command line cribbage\nPlease type your name, "Enter" to use the default ("Human"): '''.format(default)
-
-    # name = input(intro)
-    # if len(name) == 0:
-    #   name = default
-
-    name = default # debugging!
-
-    players = (HumanPlayer(name), NondeterministicAIPlayer(pone_name))
-    if args.ai:
-        players = (HumanPlayer(name), AIPlayer("Amy"))
-    if args.ai_vs_ai:
-        players = (AIPlayer("Amy"), AIPlayer("Andrew"))
-
-    scores = game_with_gui(players)
-
-    # now, by definition, the game is over
-    print('The final scores are:', zip(players,scores))
-    print("Thanks for playing a game of commmand line cribbage")
-
-    return 0
+    players = (player_choices[args.player1], player_choices[args.player2])
+    score = game_with_gui(players, debug=args.debug)
+    print('The final score is', score)
 
 if __name__ == '__main__':
     main()

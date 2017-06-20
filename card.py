@@ -48,9 +48,11 @@ class Deck:
     Methods:
 
     deck.shuffle() -> None
+
         Shuffles the deck
 
-    deck.draw(n=1) -> [Card, ]
+    deck.draw(n=1) -> [Card]
+
         Returns iterable of card objects drawn from the top of the deck
 
     '''
@@ -65,10 +67,8 @@ class Deck:
         shuffle( self.cards )
 
     def draw( self, n=1 ):
-        result = []
         for i in range( n or 1 ):
-            result.append( self.cards.pop() )
-        return result
+            yield self.cards.pop()
 
 
 # this converts into a test!
