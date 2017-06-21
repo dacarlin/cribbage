@@ -5,73 +5,50 @@ from random import shuffle
 import numpy as np
 import sys
 
-display_suits = [ 's', 'h', 'c', 'd' ]
-icon_suits =    [ '♠', '♡', '♣', '♢' ]
-display_ranks = [ 'A', 2, 3, 4, 5, 6, 7, 8, 9, 10, 'J', 'Q', 'K' ]
-vals =          [  1 , 2, 3, 4, 5, 6, 7, 8, 9, 10,  10,  10,  10 ]
-map_suits =     dict(zip(range(4),display_suits))
-map_ranks =     dict(zip(range(13),display_ranks))
-map_icons =     dict(zip(range(4),icon_suits))
-map_vals =      dict(zip(range(13),vals))
-
 class Card:
     '''
-    A class for a playing card
+    A playing card
     '''
 
-    def __init__( self, suit, rank ):
-        self.ontable = False
-        self.suit = suit
-        self.rank = rank
-        self.index = (13*self.suit)+self.rank
-        self.display_rank = map_ranks[ self.rank ]
-        self.display_suit = map_suits[ self.suit ]
-        self.icon_suit = map_icons[ self.suit ]
-        self.value = map_vals[ self.rank ]
+    suits = ['♠', '♡', '♣', '♢']
+    ranks = ['A', 2, 3, 4, 5, 6, 7, 8, 9, 10, 'J', 'Q', 'K']
+    vals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10] * 4
 
-    #def __repr__( self ):
-    #    return '{}{}'.format( self.display_rank, self.display_suit )
+    def __init__(self, index):
+        self.index = index
+        self.ontable = False
+        self.value = self.vals[index]
+
+    def get_rank(self):
+        return self.index % 13
+
+    def get_suit(self):
+        return self.index // 13
+
+    def get_value(self):
+        return
 
     def __repr__(self):
-        return '{}{}'.format(self.display_rank, self.icon_suit)
+        rank = self.ranks[self.get_rank()]
+        suit = self.suits[self.get_suit()]
+        return '{}{}'.format(rank, suit)
 
-    def __add__( self, other ):
+    def __add__(self, other):
         return self.value + other
 
-    def __radd__( self, other ):
+    def __radd__(self, other):
         return self.value + other
 
 class Deck:
     '''
     Deck of cards
-
-    Methods:
-
-    deck.shuffle() -> None
-
-        Shuffles the deck
-
-    deck.draw(n=1) -> [Card]
-
-        Returns iterable of card objects drawn from the top of the deck
-
     '''
 
-    def __init__( self ):
-        self.cards = []
-        for s in range( 4 ):
-            for r in range( 13 ):
-                self.cards.append(Card(s, r))
+    def __init__(self, shuffled=True):
+        self.cards = [Card(n) for n in range(52)]
+        if shuffled:
+            shuffle(self.cards)
 
-    def shuffle( self ):
-        shuffle( self.cards )
-
-    def draw( self, n=1 ):
-        for i in range( n or 1 ):
+    def draw(self, n=1):
+        for i in range(n):
             yield self.cards.pop()
-
-
-# this converts into a test!
-#deck = Deck()
-#deck.shuffle()
-#sum(deck.draw(52))
