@@ -1,4 +1,0 @@
-from distutils.core import setup
-from Cython.Build import cythonize
-
-setup(ext_modules=cythonize(["main.py", "players.py", "card.py", "game.py", "score.py", "wrapper.py"]))

@@ -94,7 +94,8 @@ def scoring(players, turn_card):
 
 def game(players, debug=False, gui=True):
 
-    print('>>>>>>>>>>>>>>>>>>>>>>>>>>>', gui)
+    if not gui:
+        print('Running game without GUI ...')
 
     if gui:
         for i, player in enumerate(players):
@@ -112,7 +113,6 @@ def game(players, debug=False, gui=True):
 
         # create a fresh deck object
         deck = Deck()
-        deck.shuffle()
 
         for player in players:
             player.hand = list(deck.draw(6)) # since it returns generator

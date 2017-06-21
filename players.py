@@ -18,7 +18,7 @@ class Player():
     Base class for a cribbage player
     '''
 
-    def __init__( self, name='' ):
+    def __init__(self, name=''):
         self.name = name
         self.hand = []
         self.score = 0
@@ -102,6 +102,7 @@ class EnumerativeAIPlayer(Player):
         '''
         For each possible discard,
         calculate the points of the hand
+
         plus calculat the points
         of the crib
         assume a random crib that
@@ -111,9 +112,10 @@ class EnumerativeAIPlayer(Player):
         what you know about the oppontent
 
         '''
+
         max_levels = 100
         possible = 10000
-        print("Amy is deciding on discard with thoroughness {}/1.0".format(max_levels/possible))
+        #print("Amy is deciding on discard with thoroughness {}/1.0".format(max_levels/possible))
 
         biggest_total = (-np.inf, None) #score, cards
         for i, j in combinations(self.hand, 2):
@@ -125,7 +127,6 @@ class EnumerativeAIPlayer(Player):
 
             # brute force approach
             deck = Deck()
-            deck.shuffle()
             deck = [n for n in deck.draw(52) if n.index not in indexes]
             levels = 0
             possible_scores = []
@@ -174,3 +175,19 @@ class EnumerativeAIPlayer(Player):
         #print("Amy choose", card)
         card.ontable = True
         return card # one card from self.hand
+
+class AIPlayer(Player):
+    '''
+    A player that "learns"
+    '''
+
+    def ask_for_input(self, play_vector):
+        # ignore play vector
+        card = np.random.choice(self.in_hand)
+        card.ontable = True
+        return card
+
+    def ask_for_discards(self):
+        cards = self.hand[0:2]
+        self.hand = [n for n in self.hand if n not in cards]
+        return cards
