@@ -10,7 +10,7 @@ def discards(players):
             crib.append(c)
     return crib
 
-def count(players, turn, debug=False):
+def count(players, turn, debug=False, gui=True):
     '''
     The counting game. Two loops.
 
@@ -29,7 +29,8 @@ def count(players, turn, debug=False):
         while True:
             # we are couting to 31
             current_player = players[turn^1]
-            print('Current player:', current_player)
+            if gui:
+                print('Current player:', current_player)
 
             count = sum(plays)
 
@@ -42,14 +43,16 @@ def count(players, turn, debug=False):
             current_cards = [n for n in current_player.hand if not n.ontable]
             if len(current_cards) == 0:
                 # no cards
-                print('Current player has no cards')
+                if gui:
+                    print('Current player has no cards')
                 turn = turn^1
                 break
 
             pools = [count+c>31 for c in [n for n in current_player.hand if not n.ontable]]
             if all(pools):
                 # no legal play
-                print('Current player has no legal move: "Go!"')
+                if gui:
+                    print('Current player has no legal move: "Go!"')
                 turn = turn^1
                 break
 
@@ -63,14 +66,15 @@ def count(players, turn, debug=False):
 
             plays.append(card)
             s = score_count(plays)
-
-            print("Player {} played {} (count: {}, points: {})".format(current_player, card, count+card, s))
-
-            if debug:
-                print("Score for the play is", s, "to", current_player)
             current_player.peg(s)
-
             turn = turn^1
+
+            if gui:
+                print("Player {} played {} (count: {}, points: {})".format(current_player, card, count+card, s))
+
+            if debug and gui:
+                print("Score for the play is", s, "to", current_player)
+
 
         # do we still have cards?
         # if so, we want to keep going
@@ -88,43 +92,48 @@ def scoring(players, turn_card):
         pool = player.hand + turn_card
         player.score += score(pool)
 
-def game_with_gui(players, debug=False):
+def game(players, debug=False, gui=True):
 
+    print('>>>>>>>>>>>>>>>>>>>>>>>>>>>', gui)
 
-    for i, player in enumerate(players):
-        print('Player {}: {}'.format(i, player))
+    if gui:
+        for i, player in enumerate(players):
+            print('Player {}: {}'.format(i, player))
+
+    # decide whose turn it is randomly to start
+    turn = np.random.randint(2) # 0 or 1, whose crib is it?
 
     hands = 0
     while all([p.score<121 for p in players]):
         hands +=1
-        print('>>>>> Begin: hand', hands)
+        if gui:
+            print('>>>>> Begin: hand', hands)
+            print('Dealer is player', turn, '("{}")'.format( players[turn]))
 
         # create a fresh deck object
         deck = Deck()
         deck.shuffle()
-
-        # decide whose turn it is
-        turn = np.random.randint(2) # 0 or 1, whose crib is it?
-        print('Dealer is player', turn, '("{}")'.format( players[turn]))
 
         for player in players:
             player.hand = list(deck.draw(6)) # since it returns generator
 
         # ask players for thier discards
         crib = discards(players)
-        if debug:
+        if gui and debug:
             print("Crib:", crib)
 
         # calculate scores (but do not assign yet)
         turn_card = list(deck.draw(1))
         s = [score(player.hand+turn_card) for player in players]
         crib_s = score(crib+turn_card)
-        print('The turn card is', turn_card)
+        if gui:
+            print('The turn card is', turn_card)
 
         # run the counting sub-game
         # players get scored in-game
-        count(players, turn, debug=debug)
-        print("Scores after counting", [p.score for p in players])
+        count(players, turn, debug=debug, gui=gui)
+        if gui:
+            print("Scores after counting", [p.score for p in players])
 
         # "turn" card and final scoring
         # add nibs and nobs!
@@ -133,8 +142,9 @@ def game_with_gui(players, debug=False):
             player.peg(s[i])
         players[turn].score += crib_s
 
-        print("Scores after scoring hands", [p.score for p in players])
-        print('>>>>> End: hand {}'.format(hands, ))
+        turn =  turn^1
+        if gui:
+            print("Scores after scoring hands", [p.score for p in players])
 
     # end of game (one player has > 121 points)
     return_val = [ player.score for player in players ]

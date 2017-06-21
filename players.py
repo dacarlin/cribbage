@@ -22,6 +22,11 @@ class Player():
         self.name = name
         self.hand = []
         self.score = 0
+        self.debug = False
+
+    def check_debug(debug):
+        if debug:
+            self.debug = True
 
     @property
     def sorted_hand(self):
@@ -121,7 +126,7 @@ class EnumerativeAIPlayer(Player):
             # brute force approach
             deck = Deck()
             deck.shuffle()
-            deck = [n for n in list(deck.draw(52)) if n.index not in indexes]
+            deck = [n for n in deck.draw(52) if n.index not in indexes]
             levels = 0
             possible_scores = []
             for pot_three in combinations(deck, 3):
@@ -139,7 +144,7 @@ class EnumerativeAIPlayer(Player):
             #    'and {0:2.2f} ± {1:2.2f} for you'.format(possible_scores.mean(), possible_scores.std()))
 
         best_score, cards = biggest_total
-        print("Choosing best score", best_score, "by discarding", cards)
+        #print("Choosing best score", best_score, "by discarding", cards)
         self.hand = [n for n in self.hand if n != i and n != j]
         return cards # two cards from self.hand
 
@@ -166,6 +171,6 @@ class EnumerativeAIPlayer(Player):
                 biggest_score = (my_score, card)
 
         card = biggest_score[1]
-        print("Amy choose", card)
+        #print("Amy choose", card)
         card.ontable = True
         return card # one card from self.hand
