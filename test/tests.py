@@ -1,6 +1,6 @@
-from players import EnumerativeAIPlayer
-from card import Card, Deck
-from score import score
+from .players import EnumerativeAIPlayer
+from .card import Card, Deck
+from .score import score
 import unittest
 
 

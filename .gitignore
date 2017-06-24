@@ -1,6 +1,8 @@
-table.txt 
-table2.txt 
+table.txt
+table2.txt
 log.txt
 build
 *.so
 *.c
+dist
+cribbage.egg-info

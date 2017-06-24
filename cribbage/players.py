@@ -1,8 +1,7 @@
 import numpy as np
-from score import score, score_count
+from .score import score, score_count
 from itertools import combinations
-from card import Deck
-import cython
+from .card import Deck
 
 # here we define the classes for the various kinds of players
 # in the cribbage game
@@ -44,20 +43,25 @@ class Player():
     def peg( self, points ):
         self.score += points
 
+    def __repr__(self):
+        if self.name:
+            return self.name
+        return str(self.__class__)
+
+
 class NondeterministicAIPlayer(Player):
     '''
     A player who plays randomly from legal moves
     '''
 
     def ask_for_input(self, play_vector):
-        # ignore play vector
         card = np.random.choice(self.in_hand)
         card.ontable = True
         return card
 
     def ask_for_discards(self):
         cards = self.hand[0:2]
-        self.hand = [ n for n in self.hand if n not in cards ]
+        self.hand = [n for n in self.hand if n not in cards]
         return cards
 
 class HumanPlayer(Player):
@@ -87,33 +91,26 @@ class HumanPlayer(Player):
         print(self.sorted_hand)
         d = dict(enumerate(self.sorted_hand,1))
         discard_prompt = 'Choose two cards (numbered 1-6) for the crib: '
-        inp = input( discard_prompt ) or '12'
-        cards = [ d[int(i)] for i in inp.replace(' ','') ]
+        inp = input(discard_prompt) or '12'
+        cards = [d[int(i)] for i in inp.replace(' ','')]
         self.hand = [ n for n in self.hand if n not in cards ]
-        print( 'Discarded {} {} to crib'.format(*cards) )
+        print('Discarded {} {} to crib'.format(*cards))
         return cards
 
 class EnumerativeAIPlayer(Player):
     '''
-    AI player
+    "Expert systems" style AI player that systematically
+    enumerates possible moves and chooses the move that
+    maximizes its score after the move
     '''
 
     def ask_for_discards(self):
         '''
-        For each possible discard,
-        calculate the points of the hand
-
-        plus calculat the points
-        of the crib
-        assume a random crib that
-        does not contain cards in your hand
-        actually, prior for cards being
-        in the crib should also reflect
-        what you know about the oppontent
-
+        For each possible discard, score and select
+        highest scoring move
         '''
 
-        max_levels = 100
+        max_levels = 1000
         possible = 10000
         #print("Amy is deciding on discard with thoroughness {}/1.0".format(max_levels/possible))
 

@@ -2,7 +2,6 @@
 
 from itertools import combinations
 from random import shuffle
-import numpy as np
 import sys
 
 class Card:

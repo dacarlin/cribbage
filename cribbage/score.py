@@ -1,7 +1,5 @@
 from itertools import combinations
 
-# cribbage scoring
-# ai may never know this
 def score(hand):
     '''
     Scores an unordered group of cards
