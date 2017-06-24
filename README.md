@@ -27,7 +27,7 @@ python setup.py install
 For regular use, you can run with 
 
 ```bash 
-python main.py human ai --player1-name Alex --player2-name Amy
+cribbage human ai --player1-name Alex --player2-name Amy
 ```
 
-where you can replace "Alex" with your name and "Amy" for the name you wish to call the opponent. See `python main.py -h` for more. 
+where you can replace "Alex" with your name and "Amy" for the name you wish to call the opponent, or omit them if you don't care about naming the players. See `python main.py -h` for more. 
