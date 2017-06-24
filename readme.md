@@ -2,9 +2,25 @@
 
 Implementation of [cribbage](https://www.pagat.com/adders/crib6.html) for two players. Text-based GUI for use on your command line (so you can appear to be working). Several kinds of opponents
 
-- **Rando**: opponent that plays a random legal move
-- **Amy**: AI that uses an enumerative strategy 
-- **Andrew**: AI that has been trained by playing 100,000 games 
+- **Random**: opponent that plays a random legal move
+- **Enumerative**: AI that uses an enumerative (brute force) strategy 
+- **Trained**: RL algorithm that has been trained by playing 100,000 games  
+
+## Installation 
+
+Install using `pip`:
+
+```bash
+pip install cribbage 
+``` 
+
+Or install from the source 
+
+```bash
+git clone git@github.com:dacarlin/cribbage.git
+cd cribbage 
+python setup.py install 
+```
 
 ## How to use 
 
