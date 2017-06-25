@@ -1,8 +1,7 @@
-from .players import EnumerativeAIPlayer
-from .card import Card, Deck
-from .score import score
+from cribbage.players import EnumerativeAIPlayer
+from cribbage.card import Card, Deck
+from cribbage.score import score
 import unittest
-
 
 class TestCards(unittest.TestCase):
 
