@@ -1,10 +1,12 @@
 # Cribbage for your command line 
 
-Implementation of [cribbage](https://www.pagat.com/adders/crib6.html) for two players. Text-based GUI for use on your command line (so you can appear to be working). Several kinds of opponents
+Implementation of [cribbage](https://www.pagat.com/adders/crib6.html) for two players. Text-based GUI for use on your command line (so you can appear to be working). Several kinds of opponents. 
 
-- **Random**: opponent that plays a random legal move
-- **Enumerative**: AI that uses an enumerative (brute force) strategy 
-- **Trained**: RL algorithm that has been trained by playing 100,000 games  
+## AI Opponents 
+
+- **Random**: plays a random legal move
+- **Enumerative**: enumerative (brute force) strategy 
+- **Trained**: trained by playing 100,000 games  
 
 ## Installation 
 
@@ -30,4 +32,4 @@ For regular use, you can run with
 cribbage human ai --player1-name Alex --player2-name Amy
 ```
 
-where you can replace "Alex" with your name and "Amy" for the name you wish to call the opponent, or omit them if you don't care about naming the players. See `python main.py -h` for more. 
+where you can replace "Alex" with your name and "Amy" for the name you wish to call the opponent, or omit them if you don't care about naming the players. See `cribbage -h` for more. 
