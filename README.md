@@ -24,10 +24,16 @@ python setup.py install
 
 ## How to use 
 
-For regular use, you can run with 
+If you want to play an easy game, you can run with 
 
 ```bash 
-cribbage human ai --player1-name Alex --player2-name Amy
+cribbage human random --name1 Alex --name2 Amy  
 ```
 
-where you can replace "Alex" with your name and "Amy" for the name you wish to call the opponent, or omit them if you don't care about naming the players. See `python main.py -h` for more. 
+If you would like to try playing the AI (you likely will not win), you can run with 
+
+```bash 
+cribbage human enumerative --name1 Alex --name2 Amy 
+```
+
+In either, replace "Alex" with your name and "Amy" for the name you wish to call the opponent, or omit them if you don't care about naming the players. Run `cribbage -h` for more. 
