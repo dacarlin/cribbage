@@ -2,6 +2,7 @@ import numpy as np
 from .score import score, score_count
 from itertools import combinations
 from .card import Deck
+from .ai import get_trained_model 
 
 # here we define the classes for the various kinds of players
 # in the cribbage game
@@ -175,16 +176,18 @@ class EnumerativeAIPlayer(Player):
 
 class AIPlayer(Player):
     '''
-    A player that "learns"
+    Ask the trained model for choices 
     '''
 
+    model = get_trained_model()
+    # trained model we can ask directly for plays 
+
     def ask_for_input(self, play_vector):
-        # ignore play vector
-        card = np.random.choice(self.in_hand)
+        card = model.ask_for_pegging_play(play_vector) 
         card.ontable = True
         return card
 
     def ask_for_discards(self):
-        cards = self.hand[0:2]
+        cards = model.ask_for_discards(self.hand) # note: returns card objects 
         self.hand = [n for n in self.hand if n not in cards]
         return cards
