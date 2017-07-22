@@ -132,15 +132,18 @@ def game(players, debug=False, gui=True):
         # "turn" card and final scoring
         # add nibs and nobs!
 
-        print('>>> End of hand {}'.format(hands))
+        if gui:
+            print('>>> End of hand {}'.format(hands))
         for i, player in enumerate(players):
             my_score = score(player.hand + [turn_card])
             player.peg(my_score)
-            print('{}: {} {} {} {} + {} ({})'.format(player, *player.sorted_hand, turn_card, my_score))
+            if gui:
+                print('{}: {} {} {} {} + {} ({})'.format(player, *player.sorted_hand, turn_card, my_score))
             if i == turn: # it's my crib
                 crib_score = score(crib + [turn_card])
                 player.peg(crib_score)
-                print('Crib ({}): {} {} {} {} + {} ({})'.format(player, *crib, turn_card, crib_score))
+                if gui:
+                    print('Crib ({}): {} {} {} {} + {} ({})'.format(player, *crib, turn_card, crib_score))
 
         turn =  turn^1
         if gui:
@@ -155,7 +158,7 @@ def game(players, debug=False, gui=True):
     return return_val
 
 
-# the game will eventually also be OO 
+# the game will eventually also be OO
 
 class Game:
     '''
