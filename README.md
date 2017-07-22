@@ -1,10 +1,12 @@
 # Cribbage for your command line 
 
-Implementation of [cribbage](https://www.pagat.com/adders/crib6.html) for two players. Text-based GUI for use on your command line (so you can appear to be working). Several kinds of opponents
+Implementation of [cribbage](https://www.pagat.com/adders/crib6.html) for two players. Text-based GUI for use on your command line (so you can appear to be working). Several kinds of opponents. 
 
-- **Random**: opponent that plays a random legal move
-- **Enumerative**: AI that uses an enumerative (brute force) strategy 
-- **Trained**: RL algorithm that has been trained by playing 100,000 games  
+## AI Opponents 
+
+- **Random**: plays a random legal move
+- **Enumerative**: enumerative (brute force) strategy 
+- **Trained**: trained by playing 100,000 games  
 
 ## Installation 
 
