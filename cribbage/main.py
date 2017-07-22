@@ -22,8 +22,8 @@ def main():
     if not args.no_gui:
         print("Running game with no GUI")
     players = (
-        player_choices[args.player1](name=args.player1_name),
-        player_choices[args.player2](name=args.player2_name))
+        player_choices[args.player1](name=args.name1),
+        player_choices[args.player2](name=args.name2))
     outcome = game(players, debug=args.debug, gui=args.no_gui)
     print('Score for this game:', outcome)
 

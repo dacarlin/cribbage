@@ -92,11 +92,13 @@ class HumanPlayer(Player):
         print(self.sorted_hand)
         d = dict(enumerate(self.sorted_hand,1))
         discard_prompt = 'Choose two cards (numbered 1-6) for the crib: '
-        inp = input(discard_prompt) or '12'
-        cards = [d[int(i)] for i in inp.replace(' ','')]
-        self.hand = [ n for n in self.hand if n not in cards ]
-        print('Discarded {} {} to crib'.format(*cards))
-        return cards
+        while True:
+            inp = input(discard_prompt) or '12'
+            cards = [d[int(i)] for i in inp.replace(' ','')]
+            if len(cards) == 2:
+                self.hand = [ n for n in self.hand if n not in cards ]
+                print('Discarded {} {} to crib'.format(*cards))
+                return cards
 
 class EnumerativeAIPlayer(Player):
     '''
@@ -180,15 +182,16 @@ class AIPlayer(Player):
     has "played" represented by "game vectors"
     '''
 
-    model = load_trained_model()
-    # trained model we can ask directly for plays
+    def __init__(self):
+        self.model = load_trained_model()
+        # trained model we can ask directly for plays
 
     def ask_for_input(self, play_vector):
-        card = model.ask_for_pegging_play(play_vector, self.hand)
+        card = self.model.ask_for_pegging_play(play_vector, self.hand)
         card.ontable = True
         return card
 
     def ask_for_discards(self):
-        cards = model.ask_for_discards(self.hand) # note: returns card objects
+        cards = self.model.ask_for_discards(self.hand) # note: returns card objects
         self.hand = [n for n in self.hand if n not in cards]
         return cards
