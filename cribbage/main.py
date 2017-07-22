@@ -20,11 +20,12 @@ args = parser.parse_args()
 
 def main():
     if not args.no_gui:
-        print("Running game with no GUI")
+        print("Running command-line game with no GUI")
     players = (
         player_choices[args.player1](name=args.name1),
         player_choices[args.player2](name=args.name2))
-    outcome = game(players, debug=args.debug, gui=args.no_gui)
+    outcome, _, _, _ = game(players, debug=args.debug, gui=args.no_gui)
+    # we don't need any of the other return values, they are used for training though 
     print('Score for this game:', outcome)
 
 if __name__ == '__main__':

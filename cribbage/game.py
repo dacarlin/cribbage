@@ -100,6 +100,7 @@ def game(players, debug=False, gui=True):
             else:
                 print('Player {}: {}'.format(i+1, player))
 
+    game_play_vector = []
     hands = 0
     while all([p.score<121 for p in players]):
         hands +=1
@@ -110,8 +111,10 @@ def game(players, debug=False, gui=True):
         # create a fresh deck object
         deck = Deck()
 
+        deal = []
         for player in players:
             player.hand = list(deck.draw(6)) # since it returns generator
+            deal += player.hand
 
         # ask players for thier discards
         crib = discards(players)
@@ -148,14 +151,13 @@ def game(players, debug=False, gui=True):
         turn =  turn^1
         if gui:
             print('>>> The scores are {} {} and {} {}'.format(players[0], players[0].score, players[1], players[1].score))
-        hand_play_vector = counting_vector
-
+        game_play_vector += counting_vector
 
     # end of game (one player has > 121 points)
-    return_val = [player.score for player in players]
+    scores = [player.score for player in players]
     for player in players:
         player.clean()
-    return return_val
+    return scores, game_play_vector, deal, crib 
 
 
 # the game will eventually also be OO
