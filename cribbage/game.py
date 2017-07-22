@@ -13,18 +13,13 @@ def discards(players):
 def count(players, turn, debug=False, gui=True):
     '''
     The counting game. Two loops.
-
     Inner loop is us counting to 31,
     outer loop runs until we run out of cards
     '''
 
+    counting_vector = [] # to keep track of all plays for training RL model
     game_over = False # this is for if we win during counting
     while True:
-        # True, we are playing the counting game.
-        # At the beginning of this loop, it is true
-        # that we are playing the counting game, since
-        # the `main` loop just sent us here.
-        # Since this
 
         plays = []
         while True:
@@ -78,7 +73,6 @@ def count(players, turn, debug=False, gui=True):
             if debug and gui:
                 print("Score for the play is", s, "to", current_player)
 
-
         # do we still have cards?
         # if so, we want to keep going
         if all([len([n for n in player.hand if not n.ontable]) < 1 for player in players]):
@@ -86,8 +80,14 @@ def count(players, turn, debug=False, gui=True):
             break
 
         # otherwise, continue to another game of counting to 31
+        counting_vector.append(plays)
 
     # this is the level of the original while True
+    if debug:
+        print('Counting vector:', counting_vector)
+
+    # return counting vector for training RL model
+    return counting_vector
 
 def game(players, debug=False, gui=True):
 
@@ -125,7 +125,7 @@ def game(players, debug=False, gui=True):
 
         # run the counting sub-game
         # players get scored in-game
-        count(players, turn, debug=debug, gui=gui)
+        counting_vector = count(players, turn, debug=debug, gui=gui)
         #if gui:
         #    print("Scores after counting", [p.score for p in players])
 
@@ -145,9 +145,29 @@ def game(players, debug=False, gui=True):
         turn =  turn^1
         if gui:
             print('>>> The scores are {} {} and {} {}'.format(players[0], players[0].score, players[1], players[1].score))
+        hand_play_vector = counting_vector
+
 
     # end of game (one player has > 121 points)
     return_val = [player.score for player in players]
     for player in players:
         player.clean()
     return return_val
+
+
+# the game will eventually also be OO 
+
+class Game:
+    '''
+    A game object
+    '''
+
+    def __init__(self, players):
+        self.players = players
+        self.turn = 0
+        self.final_score = None
+        self.score = (0, 0)
+
+    @property
+    def player_whose_turn_it_is():
+        self.players[self.turn]
