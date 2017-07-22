@@ -13,6 +13,7 @@ class TestCards(unittest.TestCase):
     def test_scoring(self):
         deck = Deck()
         cards = list(deck.draw(5))
+        # a score of 19 is not possible in cribbage 
         self.assertNotEqual(19, score(cards))
 
 class TestDeck(unittest.TestCase):

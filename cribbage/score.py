@@ -3,12 +3,9 @@ from itertools import combinations
 def score(hand):
     '''
     Scores an unordered group of cards
-
-    score(hand: [Card]) -> score: int
     '''
 
     points = 0
-    #assert len(hand) == 5
 
     # fifteens
     for vector_length in [2, 3, 4, 5]:
@@ -34,14 +31,13 @@ def score(hand):
     return points
 
 def score_count(plays):
-    '''
-    Score a play vector
-    '''
+    '''Score a play vector'''
+    
+    score = 0
 
     if not plays or len(plays) < 2:
-        return 0
+        return score
 
-    score = 0
     count = sum(plays)
     if count == 15 or count == 31:
         score += 2
