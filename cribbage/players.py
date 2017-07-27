@@ -1,19 +1,17 @@
 import numpy as np
-from .score import score, score_count
 from itertools import combinations
+
+from .score import score, score_count
 from .card import Deck
 from .ai import load_trained_model
 
 # here we define the classes for the various kinds of players
 # in the cribbage game
 
-# to define your own player
-# inherit from the Player class
-# and implement "ask_for_input"
-# and "ask_for_discards"
+# to define your own player, inherit from the Player class
+# and implement "ask_for_input" and "ask_for_discards"
 
 class Player():
-
     '''
     Base class for a cribbage player
     '''
@@ -37,12 +35,16 @@ class Player():
         'Cards in my hand that are not on the table'
         return [card for card in self.hand if not card.ontable]
 
-    def clean( self ):
+    def clean(self):
         self.hand = []
         self.score = 0
 
-    def peg( self, points ):
+    def peg(self, points):
         self.score += points
+        # could add a special case for if Player wins
+        # if self.score > 121:
+        #    win_game(self)
+        # where win_game is a global function?
 
     def __repr__(self):
         if self.name:
@@ -120,12 +122,12 @@ class EnumerativeAIPlayer(Player):
         biggest_total = (-np.inf, None) #score, cards
         for i, j in combinations(self.hand, 2):
 
-            # score my hands
+            # score my hand
             pot_hand = [n for n in self.hand if n != i and n != j]
             indexes = [n.index for n in pot_hand]
             combo_score = score(pot_hand)
 
-            # brute force approach
+            # possible crib outcomes 
             deck = Deck()
             deck = [n for n in deck.draw(52) if n.index not in indexes]
             levels = 0
@@ -152,7 +154,7 @@ class EnumerativeAIPlayer(Player):
     def ask_for_input(self, play_vector):
         '''
         decide which card to play
-        based on play vector
+        based on play vector.
         calculate points for each
         possible play in your hand
         and choose the one that maximizes the points
@@ -176,22 +178,26 @@ class EnumerativeAIPlayer(Player):
         card.ontable = True
         return card # one card from self.hand
 
-class AIPlayer(Player):
+class TrainedAIPlayer(Player):
     '''
-    A player that makes choices based on previous games it
-    has "played" represented by "game vectors"
+    A player that makes choices based on previous games
     '''
 
-    def __init__(self):
-        self.model = load_trained_model()
-        # trained model we can ask directly for plays
+    def __init__(self, name=''):
+        # override this constructor becasue I want to
+        # load the ML model in when we init AIPlayer instance
+        self.name = name
+        self.hand = []
+        self.score = 0
+        self.debug = False
+        self.model = load_trained_model() # trained model we can ask directly for plays
 
     def ask_for_input(self, play_vector):
-        card = self.model.ask_for_pegging_play(play_vector, self.hand)
+        card = self.model.ask_for_pegging_play(play_vector, self.in_hand)
         card.ontable = True
         return card
 
     def ask_for_discards(self):
-        cards = self.model.ask_for_discards(self.hand) # note: returns card objects
+        cards = self.model.ask_model_for_discard(self.hand) # note: returns card objects
         self.hand = [n for n in self.hand if n not in cards]
         return cards
