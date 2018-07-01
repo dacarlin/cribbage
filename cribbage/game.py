@@ -2,6 +2,7 @@ from .score import score_hand, score_count
 from .card import Deck
 from random import choice
 
+
 def discards(players):
     crib = []
     for player in players:
@@ -10,23 +11,24 @@ def discards(players):
             crib.append(c)
     return crib
 
+
 def count(players, turn, debug=False, gui=True):
-    '''
+    """
     The counting game. Two loops.
     Inner loop is us counting to 31,
     outer loop runs until we run out of cards
-    '''
+    """
 
-    counting_vector = [] # to keep track of all plays for training RL model
-    game_over = False # this is for if we win during counting
+    counting_vector = []  # to keep track of all plays for training RL model
+    game_over = False  # this is for if we win during counting
     while True:
 
         plays = []
         while True:
             # we are couting to 31
-            current_player = players[turn^1]
+            current_player = players[turn ^ 1]
             if gui and debug:
-                print('Current player:', current_player)
+                print("Current player:", current_player)
 
             count = sum(plays)
 
@@ -40,16 +42,19 @@ def count(players, turn, debug=False, gui=True):
             if len(current_cards) == 0:
                 # no cards
                 if gui and debug:
-                    print('{} has no cards'.format(current_player))
-                turn = turn^1
+                    print("{} has no cards".format(current_player))
+                turn = turn ^ 1
                 break
 
-            pools = [count+c>31 for c in [n for n in current_player.hand if not n.ontable]]
+            pools = [
+                count + c > 31
+                for c in [n for n in current_player.hand if not n.ontable]
+            ]
             if all(pools):
                 # no legal play
                 if gui:
                     print('{} has no legal move: "Go!"'.format(current_player))
-                turn = turn^1
+                turn = turn ^ 1
                 break
 
             # actually do the turn
@@ -65,17 +70,23 @@ def count(players, turn, debug=False, gui=True):
             current_player.peg(s)
             if current_player.score > 120:
                 game_over = True
-            turn = turn^1
+            turn = turn ^ 1
 
             if gui:
-                print("Player {} played {} (count: {}, points: {})".format(current_player, card, count+card, s))
+                print(
+                    "Player {} played {} (count: {}, points: {})".format(
+                        current_player, card, count + card, s
+                    )
+                )
 
             if debug and gui:
                 print("Score for the play is", s, "to", current_player)
 
         # do we still have cards?
         # if so, we want to keep going
-        if all([len([n for n in player.hand if not n.ontable]) < 1 for player in players]):
+        if all(
+            [len([n for n in player.hand if not n.ontable]) < 1 for player in players]
+        ):
             # no players have cards
             break
 
@@ -84,38 +95,39 @@ def count(players, turn, debug=False, gui=True):
 
     # this is the level of the original while True
     if debug:
-        print('Counting vector:', counting_vector)
+        print("Counting vector:", counting_vector)
 
     # return counting vector for training RL model
     return counting_vector
+
 
 def game(players, debug=False, gui=True):
 
     turn = choice((0, 1))
     if gui:
-        print('Started a new game')
+        print("Started a new game")
         for i, player in enumerate(players):
             if i == turn:
-                dealer = player 
-                print('Player {}: {} (dealer)'.format(i+1, player))
+                dealer = player
+                print("Player {}: {} (dealer)".format(i + 1, player))
             else:
-                pone = player 
-                print('Player {}: {}'.format(i+1, player))
+                pone = player
+                print("Player {}: {}".format(i + 1, player))
 
     game_play_vector = []
     hands = 0
-    while all([p.score<121 for p in players]):
-        hands +=1
+    while all([p.score < 121 for p in players]):
+        hands += 1
         if gui:
-            print('>>> Begin hand', hands)
-            #print('Dealer is player', turn, '("{}")'.format( players[turn]))
+            print(">>> Begin hand", hands)
+            # print('Dealer is player', turn, '("{}")'.format( players[turn]))
 
         # create a fresh deck object
         deck = Deck()
 
         deal = []
         for player in players:
-            player.hand = list(deck.draw(6)) # since it returns generator
+            player.hand = list(deck.draw(6))  # since it returns generator
             deal += player.hand
 
         # ask players for thier discards
@@ -123,40 +135,52 @@ def game(players, debug=False, gui=True):
         if gui and debug:
             print("Crib:", crib)
 
-        # the turn card 
+        # the turn card
         turn_card = next(deck.draw(1))
-        if str(turn_card)[0] == 'J':
-            # dealer gets two points 
-            dealer.peg(2) 
-            
+        if str(turn_card)[0] == "J":
+            # dealer gets two points
+            dealer.peg(2)
+
         if gui:
-            print('>>> The turn card is', turn_card)
+            print(">>> The turn card is", turn_card)
 
         # run the counting sub-game
         # players get scored in-game
         counting_vector = count(players, turn, debug=debug, gui=gui)
-        #if gui:
+        # if gui:
         #    print("Scores after counting", [p.score for p in players])
 
         # "turn" card and final scoring
         # add nibs and nobs!
 
         if gui:
-            print('>>> End of hand {}'.format(hands))
+            print(">>> End of hand {}".format(hands))
         for i, player in enumerate(players):
             my_score = score_hand(player.hand, turn_card)
             player.peg(my_score)
             if gui:
-                print('{}: {} {} {} {} + {} ({})'.format(player, *player.sorted_hand, turn_card, my_score))
-            if i == turn: # it's my crib
+                print(
+                    "{}: {} {} {} {} + {} ({})".format(
+                        player, *player.sorted_hand, turn_card, my_score
+                    )
+                )
+            if i == turn:  # it's my crib
                 crib_score = score_hand(crib, turn_card, is_crib=True)
                 player.peg(crib_score)
                 if gui:
-                    print('Crib ({}): {} {} {} {} + {} ({})'.format(player, *crib, turn_card, crib_score))
+                    print(
+                        "Crib ({}): {} {} {} {} + {} ({})".format(
+                            player, *crib, turn_card, crib_score
+                        )
+                    )
 
-        turn =  turn^1
+        turn = turn ^ 1
         if gui:
-            print('>>> The scores are {} {} and {} {}'.format(players[0], players[0].score, players[1], players[1].score))
+            print(
+                ">>> The scores are {} {} and {} {}".format(
+                    players[0], players[0].score, players[1], players[1].score
+                )
+            )
         game_play_vector += counting_vector
 
     # end of game (one player has > 121 points)
@@ -168,10 +192,11 @@ def game(players, debug=False, gui=True):
 
 # the game will eventually also be OO
 
+
 class Game:
-    '''
+    """
     A game object
-    '''
+    """
 
     def __init__(self, players):
         self.players = players
