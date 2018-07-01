@@ -1,40 +1,81 @@
 from itertools import combinations
 
-def score(hand):
+def score_hand(hand, turn_card):
+    '''Score a valid cribbage hand
+    
+    Parameters
+    ----------
+    hand: list of cribbage.Card
+        Exactly four cards forming a hand 
+        
+    turn_card: cribbage.Card
+        The turn card 
     '''
-    Scores an unordered group of cards
-    '''
+
+    if len(hand) != 4:
+        raise ValueError('To score a hand, it must have 4 cards, not {}'.format(len(hand)))
 
     points = 0
+    points += score_fifteens(hand, turn_card)
+    points += score_sets(hand, turn_card)
+    points += score_runs(hand, turn_card)
+    points += score_flush_and_right_jack(hand, turn_card)
 
-    # fifteens
+    return points 
+
+def score_fifteens(hand, turn_card):
+    points = 0 
     for vector_length in [2, 3, 4, 5]:
-        for vector in combinations(hand, vector_length):
+        for vector in combinations(hand + [turn_card], vector_length):
             if sum(vector) == 15:
                 points += 2
 
+    return points 
+
+
+def score_flush_and_right_jack(hand, turn_card): 
+
+    points = 0 
+    suits = []
+    suits.append(turn_card.get_suit())
+    for card in hand:
+        suits.append(card.get_suit())
+        if str(card)[0] == 'J' and card.get_suit() == turn_card.get_suit():
+            # the right jack
+            points += 1 
+    
+    # flush 
+    if len(set(suits)) == 1:
+        points += 5 
+
+    return points 
+
+
+def score_sets(hand, turn_card): 
+    points = 0 
     # pairs (not necessary to account for more than pairs for ==)
-    for i, j in combinations(hand, 2):
+    for i, j in combinations(hand + [turn_card], 2):
         if i.get_rank() == j.get_rank():
             points += 2
+    return points 
 
-    # runs
-    for vector_len in [ 5, 4, 3 ]:
-        for vec in combinations(hand, vector_len):
-            vals = [ card.value for card in vec ]
-            run = [ n + min( vals ) for n in range( vector_len ) ]
-            if sorted( vals ) == run:
-                points += vector_len
+def score_runs(hand, turn_card):
+    points = 0 
+    for vector_len in [5, 4, 3]:
+        for vec in combinations(hand + [turn_card], vector_len):
+            vals = [card.run_val for card in vec]
+            run = [n + min(vals) for n in range(vector_len)]
+            if sorted(vals) == run:
+                points += vector_len 
                 break
-            break
-
+        if points > 0:
+            break 
     return points
 
 def score_count(plays):
     '''Score a play vector'''
     
     score = 0
-
     if not plays or len(plays) < 2:
         return score
 
@@ -44,6 +85,8 @@ def score_count(plays):
 
     if plays[-1].get_rank() == plays[-2].get_rank():
         score += 2
-        # also implement triples!
+    if plays[-2].get_rank() == plays[-3].get_rank():
+        score += 4
+        # hack? or does that actually make sense? 
 
     return score

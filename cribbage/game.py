@@ -1,4 +1,4 @@
-from .score import score, score_count
+from .score import score_hand, score_count
 from .card import Deck
 from random import choice
 
@@ -40,7 +40,7 @@ def count(players, turn, debug=False, gui=True):
             if len(current_cards) == 0:
                 # no cards
                 if gui and debug:
-                    print('Current player has no cards')
+                    print('{} has no cards'.format(current_player))
                 turn = turn^1
                 break
 
@@ -48,7 +48,7 @@ def count(players, turn, debug=False, gui=True):
             if all(pools):
                 # no legal play
                 if gui:
-                    print('Current player has no legal move: "Go!"')
+                    print('{} has no legal move: "Go!"'.format(current_player))
                 turn = turn^1
                 break
 
@@ -93,11 +93,13 @@ def game(players, debug=False, gui=True):
 
     turn = choice((0, 1))
     if gui:
-        print('Welcome to cribbage')
+        print('Started a new game')
         for i, player in enumerate(players):
             if i == turn:
+                dealer = player 
                 print('Player {}: {} (dealer)'.format(i+1, player))
             else:
+                pone = player 
                 print('Player {}: {}'.format(i+1, player))
 
     game_play_vector = []
@@ -121,8 +123,12 @@ def game(players, debug=False, gui=True):
         if gui and debug:
             print("Crib:", crib)
 
-        # calculate scores (but do not assign yet)
+        # the turn card 
         turn_card = next(deck.draw(1))
+        if str(turn_card)[0] == 'J':
+            # dealer gets two points 
+            dealer.peg(2) 
+            
         if gui:
             print('>>> The turn card is', turn_card)
 
@@ -138,12 +144,12 @@ def game(players, debug=False, gui=True):
         if gui:
             print('>>> End of hand {}'.format(hands))
         for i, player in enumerate(players):
-            my_score = score(player.hand + [turn_card])
+            my_score = score_hand(player.hand, turn_card)
             player.peg(my_score)
             if gui:
                 print('{}: {} {} {} {} + {} ({})'.format(player, *player.sorted_hand, turn_card, my_score))
             if i == turn: # it's my crib
-                crib_score = score(crib + [turn_card])
+                crib_score = score_hand(crib, turn_card, is_crib=True)
                 player.peg(crib_score)
                 if gui:
                     print('Crib ({}): {} {} {} {} + {} ({})'.format(player, *crib, turn_card, crib_score))
@@ -157,7 +163,7 @@ def game(players, debug=False, gui=True):
     scores = [player.score for player in players]
     for player in players:
         player.clean()
-    return scores, game_play_vector, deal, crib 
+    return scores, game_play_vector, deal, crib
 
 
 # the game will eventually also be OO

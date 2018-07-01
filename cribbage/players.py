@@ -1,7 +1,7 @@
 import numpy as np
 from itertools import combinations
 
-from .score import score, score_count
+from .score import score_hand, score_count
 from .card import Deck
 from .ai import load_trained_model
 
