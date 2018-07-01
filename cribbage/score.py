@@ -1,7 +1,7 @@
 from itertools import combinations
 
 
-def score_hand(hand, turn_card):
+def score_hand(hand, turn_card, is_crib=False):
     """Score a valid cribbage hand
     
     Parameters
@@ -91,7 +91,7 @@ def score_count(plays):
 
     if plays[-1].get_rank() == plays[-2].get_rank():
         score += 2
-    if plays[-2].get_rank() == plays[-3].get_rank():
+    if len(plays) > 2 and plays[-2].get_rank() == plays[-3].get_rank():
         score += 4
         # hack? or does that actually make sense?
 

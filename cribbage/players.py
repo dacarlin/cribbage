@@ -68,6 +68,8 @@ class NondeterministicAIPlayer(Player):
         self.hand = [n for n in self.hand if n not in cards]
         return cards
 
+RandomPlayer = NondeterministicAIPlayer
+
 
 class HumanPlayer(Player):
     def ask_for_input(self, play_vector):
@@ -127,7 +129,7 @@ class EnumerativeAIPlayer(Player):
             # score my hand
             pot_hand = [n for n in self.hand if n != i and n != j]
             indexes = [n.index for n in pot_hand]
-            combo_score = score(pot_hand)
+            combo_score = score_hand(pot_hand)
 
             # possible crib outcomes
             deck = Deck()
@@ -138,7 +140,7 @@ class EnumerativeAIPlayer(Player):
                 levels += 1
                 if levels < max_levels:
                     hand = pot_hand + list(pot_three)
-                    possible_scores.append(score(hand))
+                    possible_scores.append(score_hand(hand))
             possible_scores = np.array(possible_scores)
             total = combo_score - possible_scores.mean()
             total_pkg = (total, [i, j])

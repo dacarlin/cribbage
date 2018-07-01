@@ -104,6 +104,11 @@ def count(players, turn, debug=False, gui=True):
 def game(players, debug=False, gui=True):
 
     turn = choice((0, 1))
+    for i, player in enumerate(players):
+        if i == turn:
+            dealer = player
+        else:
+            pone = player
     if gui:
         print("Started a new game")
         for i, player in enumerate(players):
