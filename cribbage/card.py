@@ -55,6 +55,9 @@ class Card:
     def __radd__(self, other):
         return self.value + other
 
+    def __eq__(self, other):
+        return self.index == other.index
+
 
 class Deck:
     """
@@ -67,8 +70,10 @@ class Deck:
             shuffle(self.cards)
 
     def draw(self, n=1):
+        result = []
         for i in range(n):
-            yield self.cards.pop()
+            result.append(self.cards.pop()) 
+        return result 
 
 
 def card_from_str(input_str):

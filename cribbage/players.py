@@ -1,51 +1,88 @@
+from random import choice 
 import numpy as np
+from tqdm import tqdm
 from itertools import combinations
 
 from .score import score_hand, score_count
 from .card import Deck
 from .ai import load_trained_model
 
-# here we define the classes for the various kinds of players
-# in the cribbage game
+# Here we define the classes for the various kinds of players
+# in the cribbage game. To define your own player, inherit from 
+# the Player class and implement "ask_for_input" and "ask_for_discards"
 
-# to define your own player, inherit from the Player class
-# and implement "ask_for_input" and "ask_for_discards"
-
+class WinGame(Exception):
+    pass 
 
 class Player:
     """
     Base class for a cribbage player
     """
 
-    def __init__(self, name=""):
+    def __init__(self, name=None):
         self.name = name
-        self.hand = []
+        self.hand = []  # cards in player's hand
+        self.table = [] # cards on table in front of player 
+        self.crib = []  # cards in player's crib
         self.score = 0
-        self.debug = False
 
-    def check_debug(debug):
-        if debug:
-            self.debug = True
 
-    @property
-    def sorted_hand(self):
-        return sorted(self.hand, key=lambda c: c.value)
+    # Discards 
 
-    @property
-    def in_hand(self):
-        "Cards in my hand that are not on the table"
-        return [card for card in self.hand if not card.ontable]
+    def ask_for_discards():
+        '''Should return two cards from the player'''
+        raise Exception('You need to implement `ask_for_discards` yourself')
 
-    def clean(self):
-        self.hand = []
-        self.score = 0
+    def discards(self):
+        cards = self.ask_for_discards()
+        self.update_after_discards(cards)
+        return cards 
+
+    def update_after_discards(self, discards):
+        for discard in discards:
+            self.hand.remove(discard)
+
+
+    # Counting plays 
+
+    def ask_for_play(self):
+        '''Should return a single card from the player'''
+        raise Exception('You need to implement `ask_for_play` yourself')
+
+    def play(self, previous_plays):
+        while True:
+            card = self.ask_for_play(previous_plays) # need to implement this 
+            print('card in play', card)
+            if sum(previous_plays) + card < 32:
+                self.update_after_play(card)
+                break 
+
+    def update_after_play(self, play):
+        # Mark the card 
+        self.table.append(play)
+        self.hand.remove(play)
+
+
+    # Scoring 
+
+    def count_hand(self, turn_card):
+        score = score_hand(self.hand, turn_card)
+        self.peg(score)
+
+    def win_game(self):
+        raise WinGame('Game was won by {}'.format(self)) 
 
     def peg(self, points):
         self.score += points
-        # could add a special case for if Player wins
-        # if self.score > 121:
-        #    win_game(self)
-        # where win_game is a global function?
+        if self.score > 121:
+            self.win_game() 
+
+    @property
+    def sorted_hand(self):
+        return sorted(self.hand, key=lambda c: c.index)
+
+
+    # Pretty print 
 
     def __repr__(self):
         if self.name:
@@ -53,57 +90,57 @@ class Player:
         return str(self.__class__)
 
 
-class NondeterministicAIPlayer(Player):
+
+class RandomPlayer(Player):
     """
     A player who plays randomly from legal moves
     """
 
-    def ask_for_input(self, play_vector):
-        card = np.random.choice(self.in_hand)
-        card.ontable = True
-        return card
+    def ask_for_play(self, previous_plays):
+        play = choice(self.hand)
+        return play
 
     def ask_for_discards(self):
         cards = self.hand[0:2]
-        self.hand = [n for n in self.hand if n not in cards]
         return cards
 
-RandomPlayer = NondeterministicAIPlayer
 
 
 class HumanPlayer(Player):
-    def ask_for_input(self, play_vector):
+    '''
+    A human player 
+    '''
+
+    def ask_for_play(self, previous_plays):
         """
         Ask a human for a card, in the counting phase
         """
 
-        print("Play vector:", play_vector, "({})".format(sum(play_vector)))
-        count = sum(play_vector)
-        d = dict(enumerate(self.in_hand, 1))
-        print(d)
-
-        discard_prompt = "Choose a card to play: "
-        while 1:
-            inp = input(discard_prompt)
+        # First, print out the play vector and our options
+        d = dict(enumerate(self.hand, 1))
+        print("Plays (count):", previous_plays, "({})".format(sum(previous_plays)))
+        print("Your hand:", ' '.join([str(c) for c in self.hand]))
+        
+        # Let us nominate a card 
+        while True:
+            inp = input('Card number to play: ') or "1"
             if len(inp) > 0 and int(inp) in d.keys():
                 card = d[int(inp)]
-                if count + card < 31:
-                    card.ontable = True
-                    return card
+                return card
 
     def ask_for_discards(self):
         """After deal, ask a human for a card"""
 
         print(self.sorted_hand)
         d = dict(enumerate(self.sorted_hand, 1))
-        discard_prompt = "Choose two cards (numbered 1-6) for the crib: "
+        discard_prompt = "Type two numbers followed by <Enter>, for example 16<Enter> to discard the first and the sixth (last) card: "
         while True:
             inp = input(discard_prompt) or "12"
-            cards = [d[int(i)] for i in inp.replace(" ", "")]
+            cards = [d[int(i)] for i in inp.replace(" ", "").replace(",", "")]
             if len(cards) == 2:
-                self.hand = [n for n in self.hand if n not in cards]
-                print("Discarded {} {} to crib".format(*cards))
+                print("Chose {} {} for crib".format(*cards))
                 return cards
+
 
 
 class EnumerativeAIPlayer(Player):
@@ -119,68 +156,36 @@ class EnumerativeAIPlayer(Player):
         highest scoring move
         """
 
-        max_levels = 1000
-        possible = 10000
-        # print("Amy is deciding on discard with thoroughness {}/1.0".format(max_levels/possible))
-
-        biggest_total = (-np.inf, None)  # score, cards
-        for i, j in combinations(self.hand, 2):
-
-            # score my hand
-            pot_hand = [n for n in self.hand if n != i and n != j]
-            indexes = [n.index for n in pot_hand]
-            combo_score = score_hand(pot_hand)
-
-            # possible crib outcomes
-            deck = Deck()
-            deck = [n for n in deck.draw(52) if n.index not in indexes]
-            levels = 0
-            possible_scores = []
-            for pot_three in combinations(deck, 3):
-                levels += 1
-                if levels < max_levels:
-                    hand = pot_hand + list(pot_three)
-                    possible_scores.append(score_hand(hand))
-            possible_scores = np.array(possible_scores)
-            total = combo_score - possible_scores.mean()
-            total_pkg = (total, [i, j])
-            if total > biggest_total[0]:
-                biggest_total = total_pkg
-
-            # print('Discarding', i, j, '=', combo_score, 'for me',
-            #    'and {0:2.2f} ± {1:2.2f} for you'.format(possible_scores.mean(), possible_scores.std()))
-
-        best_score, cards = biggest_total
-        # print("Choosing best score", best_score, "by discarding", cards)
-        self.hand = [n for n in self.hand if n != i and n != j]
-        return cards  # two cards from self.hand
+        print("{} is choosing discards ...".format(self))
+        deck = Deck().draw(52)
+        potential_cards = [n for n in deck if n not in self.hand]
+        bar = tqdm(total=227700)
+        discards = []
+        mean_scores = []
+        for discard in combinations(self.hand, 2): # 6 choose 2 == 15 
+            inner_scores = []
+            for pot in combinations(potential_cards, 3): # 46 choose 3 == 15,180
+                inner_scores.append(score_hand([*discard, *pot[:-1]], pot[-1]))
+                bar.update(1)
+            inner_scores = np.array(inner_scores)
+            discards.append(discard)
+            mean_scores.append(inner_scores.mean())
+        max_index = np.argmax(mean_scores)
+        return discards[max_index]
 
     def ask_for_input(self, play_vector):
         """
-        decide which card to play
-        based on play vector.
-        calculate points for each
-        possible play in your hand
+        Calculate points for each possible play in your hand
         and choose the one that maximizes the points
         """
 
-        # print("Amy is deciding which card to play")
-        # print("Play vector:", play_vector)
-        cards = [n for n in self.hand if not n.ontable]
-        # print("Cards:", cards)
-        biggest_score = (-np.inf, None)
-        for card in cards:
-            pool = play_vector + [card]
-            cnt = sum(pool)
-            my_score = score_count(pool)
-            # print('Playing', card, 'gives pool', pool, 'count', cnt, 'and score', my_score )
-            if my_score > biggest_score[0]:
-                biggest_score = (my_score, card)
-
-        card = biggest_score[1]
-        # print("Amy choose", card)
-        card.ontable = True
-        return card  # one card from self.hand
+        scores = []
+        plays = []
+        for card in self.hand:
+            plays.append(card)
+            scores.append(score_count(play_vector + [card]))
+        max_index = np.argmax(scores)
+        return plays[max_index]
 
 
 class TrainedAIPlayer(Player):
@@ -208,3 +213,6 @@ class TrainedAIPlayer(Player):
         )  # note: returns card objects
         self.hand = [n for n in self.hand if n not in cards]
         return cards
+
+
+NondeterministicAIPlayer = RandomPlayer

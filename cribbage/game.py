@@ -141,7 +141,7 @@ def game(players, debug=False, gui=True):
             print("Crib:", crib)
 
         # the turn card
-        turn_card = next(deck.draw(1))
+        turn_card = deck.draw(1)[0] # LIST OF LEN 1 
         if str(turn_card)[0] == "J":
             # dealer gets two points
             dealer.peg(2)
@@ -195,20 +195,74 @@ def game(players, debug=False, gui=True):
     return scores, game_play_vector, deal, crib
 
 
-# the game will eventually also be OO
+class Hand:
+
+    def __init__(self, dealer, pone):
+        '''Create a new hand
+
+        Parameters
+        ----------
+        dealer: Player
+            The player who is the dealer 
+        
+        pone: Player
+            The player who is the opponent 
+        '''
+
+        self.dealer = dealer
+        self.pone = pone
+        self.turn_card = None 
+
+    def run(self):
+        '''Run the entire hand'''
+        self.deal() 
+        self.discards() 
+        self.counting()
+        self.count_hands()
+        self.clean_up() 
+
+    def deal(self):
+        deck = Deck()
+        self.dealer.hand = deck.draw(6)
+        self.pone.hand = deck.draw(6)
+        self.turn_card = deck.draw(1)[0]
+
+    def discards(self):
+        d1 = self.dealer.discards()
+        d2 = self.pone.discards()
+        self.dealer.crib = d1 + d2
+
+    def counting(self):
+        print('Playing the counting game')
+        while True:
+            previous_plays = []
+            previous_plays.append(self.pone.play(previous_plays))
+            previous_plays.append(self.dealer.play(previous_plays))
+
+    def count_hands(self):
+        self.pone.count_hand(self.turn_card) 
+        self.dealer.count_hand(self.turn_card) 
+
+    def clean_up(self):
+        pass 
 
 
 class Game:
-    """
-    A game object
-    """
+    def __init__(self, A, B, deal=None):
+        '''Create a new Game object from two Player instances'''
+        self.A = A 
+        self.B = B 
+        if deal is None:
+            self.deal = choice((0, 1))
+            print('Deal is', self.deal)
 
-    def __init__(self, players):
-        self.players = players
-        self.turn = 0
-        self.final_score = None
-        self.score = (0, 0)
-
-    @property
-    def player_whose_turn_it_is():
-        self.players[self.turn]
+    def run(self):
+        while True:
+            if self.deal == 0:
+                hand = Hand(self.A, self.B) 
+                hand.run() 
+                self.deal = 1
+            else:
+                hand = Hand(self.B, self.A) 
+                hand.run() 
+                self.deal = 0
