@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 from .game import Game
 from .players import (
-    WinGame, 
+    WinGame,
     HumanPlayer,
     NondeterministicAIPlayer,
     EnumerativeAIPlayer,
@@ -28,8 +28,8 @@ def main():
     player_1 = player_choices[args.player1](name=args.name1)
     player_2 = player_choices[args.player2](name=args.name2)
     game = Game(player_1, player_2)
-    
-    try:        
-        game.run() 
+
+    try:
+        game.run()
     except WinGame as win_game:
         print(win_game)

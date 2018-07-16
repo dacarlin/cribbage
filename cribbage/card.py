@@ -72,8 +72,8 @@ class Deck:
     def draw(self, n=1):
         result = []
         for i in range(n):
-            result.append(self.cards.pop()) 
-        return result 
+            result.append(self.cards.pop())
+        return result
 
 
 def card_from_str(input_str):

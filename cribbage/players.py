@@ -1,4 +1,4 @@
-from random import choice 
+from random import choice
 import numpy as np
 from tqdm import tqdm
 from itertools import combinations
@@ -8,11 +8,13 @@ from .card import Deck
 from .ai import load_trained_model
 
 # Here we define the classes for the various kinds of players
-# in the cribbage game. To define your own player, inherit from 
+# in the cribbage game. To define your own player, inherit from
 # the Player class and implement "ask_for_input" and "ask_for_discards"
 
+
 class WinGame(Exception):
-    pass 
+    pass
+
 
 class Player:
     """
@@ -22,73 +24,72 @@ class Player:
     def __init__(self, name=None):
         self.name = name
         self.hand = []  # cards in player's hand
-        self.table = [] # cards on table in front of player 
+        self.table = []  # cards on table in front of player
         self.crib = []  # cards in player's crib
         self.score = 0
 
-
-    # Discards 
+    # Discards
 
     def ask_for_discards():
-        '''Should return two cards from the player'''
-        raise Exception('You need to implement `ask_for_discards` yourself')
+        """Should return two cards from the player"""
+        raise Exception("You need to implement `ask_for_discards` yourself")
 
     def discards(self):
         cards = self.ask_for_discards()
         self.update_after_discards(cards)
-        return cards 
+        return cards
 
     def update_after_discards(self, discards):
         for discard in discards:
             self.hand.remove(discard)
 
-
-    # Counting plays 
+    # Counting plays
 
     def ask_for_play(self):
-        '''Should return a single card from the player'''
-        raise Exception('You need to implement `ask_for_play` yourself')
+        """Should return a single card from the player"""
+        raise Exception("You need to implement `ask_for_play` yourself")
 
     def play(self, previous_plays):
         while True:
-            card = self.ask_for_play(previous_plays) # need to implement this 
-            print('card in play', card)
-            if sum(previous_plays) + card < 32:
+            card = self.ask_for_play(previous_plays)  # need to implement this
+            print("card in play", card)
+            if sum(previous_plays) + card.value < 32:
                 self.update_after_play(card)
-                break 
+                return card
 
     def update_after_play(self, play):
-        # Mark the card 
+        # Mark the card
         self.table.append(play)
         self.hand.remove(play)
 
-
-    # Scoring 
+    # Scoring
 
     def count_hand(self, turn_card):
+        """Pick up the cards from the table and count hand"""
+
+        self.hand = self.table
+        self.table = []
         score = score_hand(self.hand, turn_card)
         self.peg(score)
 
     def win_game(self):
-        raise WinGame('Game was won by {}'.format(self)) 
+        raise WinGame("Game was won by {}".format(self))
 
     def peg(self, points):
         self.score += points
         if self.score > 121:
-            self.win_game() 
+            self.win_game()
 
     @property
     def sorted_hand(self):
         return sorted(self.hand, key=lambda c: c.index)
 
-
-    # Pretty print 
+    # Pretty print
 
     def __repr__(self):
         if self.name:
             return self.name
         return str(self.__class__)
-
 
 
 class RandomPlayer(Player):
@@ -97,19 +98,16 @@ class RandomPlayer(Player):
     """
 
     def ask_for_play(self, previous_plays):
-        play = choice(self.hand)
-        return play
+        return self.hand[0]
 
     def ask_for_discards(self):
-        cards = self.hand[0:2]
-        return cards
-
+        return self.hand[0:2]
 
 
 class HumanPlayer(Player):
-    '''
+    """
     A human player 
-    '''
+    """
 
     def ask_for_play(self, previous_plays):
         """
@@ -119,11 +117,11 @@ class HumanPlayer(Player):
         # First, print out the play vector and our options
         d = dict(enumerate(self.hand, 1))
         print("Plays (count):", previous_plays, "({})".format(sum(previous_plays)))
-        print("Your hand:", ' '.join([str(c) for c in self.hand]))
-        
-        # Let us nominate a card 
+        print("Your hand:", " ".join([str(c) for c in self.hand]))
+
+        # Let us nominate a card
         while True:
-            inp = input('Card number to play: ') or "1"
+            inp = input("Card number to play: ") or "1"
             if len(inp) > 0 and int(inp) in d.keys():
                 card = d[int(inp)]
                 return card
@@ -140,7 +138,6 @@ class HumanPlayer(Player):
             if len(cards) == 2:
                 print("Chose {} {} for crib".format(*cards))
                 return cards
-
 
 
 class EnumerativeAIPlayer(Player):
@@ -162,9 +159,9 @@ class EnumerativeAIPlayer(Player):
         bar = tqdm(total=227700)
         discards = []
         mean_scores = []
-        for discard in combinations(self.hand, 2): # 6 choose 2 == 15 
+        for discard in combinations(self.hand, 2):  # 6 choose 2 == 15
             inner_scores = []
-            for pot in combinations(potential_cards, 3): # 46 choose 3 == 15,180
+            for pot in combinations(potential_cards, 3):  # 46 choose 3 == 15,180
                 inner_scores.append(score_hand([*discard, *pot[:-1]], pot[-1]))
                 bar.update(1)
             inner_scores = np.array(inner_scores)
