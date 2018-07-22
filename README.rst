@@ -9,8 +9,7 @@ Opponents
 ---------
 
 - **Random**. This opponent plays a random legal move. 
-- **Brute Force**. This opponent uses an enumerative strategy to determine the move with the greatest possible reward (points), and takes that move. 
-- **Trained**. This opponent plays according to predictions made by a machine learning model. The predictions are based the outcomes of the games in the training data set (see the `train` directory). 
+- **Expert**. This opponent uses an enumerative strategy to determine the move with the greatest possible reward (points), and takes that move. 
 
 Installation 
 ------------
@@ -45,7 +44,7 @@ If you would like to try playing one of the AI opponents (you likely will not wi
 
 .. code-block:: bash
 
-	cribbage human brute_force --name1 Alan --name2 Arin
+	cribbage human expert --name1 Alan --name2 Arin
 
 
 In either case, replace "Alex" with your name and "Amy" for the name you wish to call the opponent, or omit them if you don't care about naming the players. 

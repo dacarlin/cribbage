@@ -40,15 +40,23 @@ class Hand:
         self.dealer.crib = d1 + d2
 
     def counting(self):
+
         print("Playing the counting game")
+
+        whose_turn = {0: self.pone, 1: self.dealer}
+        turn_index = 0 
+
         while len(self.dealer.hand) + len(self.pone.hand) > 0:
-            previous_plays = []
-            previous_plays.append(self.pone.play(previous_plays))
-            previous_plays.append(self.dealer.play(previous_plays))
+            whose_turn[turn_index].play([]) # prevoius plays is None 
+            turn_index = turn_index ^ 1 # changes 0 to 1 and 1 to 0 
+
+    def play_counting_hand(self, n):
+        pass 
 
     def count_hands(self):
         self.pone.count_hand(self.turn_card)
         self.dealer.count_hand(self.turn_card)
+        self.dealer.count_crib(self.turn_card)
 
     def clean_up(self):
         self.dealer.hand = []

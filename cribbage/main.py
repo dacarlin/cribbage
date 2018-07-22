@@ -5,7 +5,6 @@ from .players import (
     HumanPlayer,
     NondeterministicAIPlayer,
     EnumerativeAIPlayer,
-    TrainedAIPlayer,
 )
 
 
@@ -13,8 +12,7 @@ def main():
 
     player_choices = {
         "human": HumanPlayer,
-        "brute_force": EnumerativeAIPlayer,
-        "trained": TrainedAIPlayer,
+        "expert": EnumerativeAIPlayer,
         "random": NondeterministicAIPlayer,
     }
 

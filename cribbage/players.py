@@ -1,11 +1,10 @@
+from itertools import combinations
 from random import choice
 import numpy as np
 from tqdm import tqdm
-from itertools import combinations
 
 from .score import score_hand, score_count
 from .card import Deck
-from .ai import load_trained_model
 
 # Here we define the classes for the various kinds of players
 # in the cribbage game. To define your own player, inherit from
@@ -71,6 +70,13 @@ class Player:
         self.table = []
         score = score_hand(self.hand, turn_card)
         self.peg(score)
+        return score # why also return this? 
+
+    def count_crib(self, turn_card):
+        """Count crib, with side effect of pegging the score"""
+        score = score_hand(self.crib, turn_card)
+        self.peg(score)
+        return score 
 
     def win_game(self):
         raise WinGame("Game was won by {}".format(self))
@@ -185,31 +191,31 @@ class EnumerativeAIPlayer(Player):
         return plays[max_index]
 
 
-class TrainedAIPlayer(Player):
-    """
-    A player that makes choices based on previous games
-    """
+# class TrainedAIPlayer(Player):
+#     """
+#     A player that makes choices based on previous games
+#     """
 
-    def __init__(self, name=""):
-        # override this constructor becasue I want to
-        # load the ML model in when we init AIPlayer instance
-        self.name = name
-        self.hand = []
-        self.score = 0
-        self.debug = False
-        self.model = load_trained_model()  # trained model we can ask directly for plays
+#     def __init__(self, name=""):
+#         # override this constructor becasue I want to
+#         # load the ML model in when we init AIPlayer instance
+#         self.name = name
+#         self.hand = []
+#         self.score = 0
+#         self.debug = False
+#         self.model = load_trained_model()  # trained model we can ask directly for plays
 
-    def ask_for_input(self, play_vector):
-        card = self.model.ask_for_pegging_play(play_vector, self.in_hand)
-        card.ontable = True
-        return card
+#     def ask_for_input(self, play_vector):
+#         card = self.model.ask_for_pegging_play(play_vector, self.in_hand)
+#         card.ontable = True
+#         return card
 
-    def ask_for_discards(self):
-        cards = self.model.ask_model_for_discard(
-            self.hand
-        )  # note: returns card objects
-        self.hand = [n for n in self.hand if n not in cards]
-        return cards
+#     def ask_for_discards(self):
+#         cards = self.model.ask_model_for_discard(
+#             self.hand
+#         )  # note: returns card objects
+#         self.hand = [n for n in self.hand if n not in cards]
+#         return cards
 
 
 NondeterministicAIPlayer = RandomPlayer
