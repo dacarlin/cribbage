@@ -19,6 +19,8 @@ class Hand:
         self.dealer = dealer
         self.pone = pone
         self.turn_card = None
+        self.turn_index = 0 
+        self.turn_map = {0: self.pone, 1: self.dealer}
 
     def run(self):
         """Run the entire hand"""
@@ -39,19 +41,19 @@ class Hand:
         d2 = self.pone.discards()
         self.dealer.crib = d1 + d2
 
+    def count_to_31(self):
+        count = 0 
+        plays = []
+        print('count, plays', count, plays)
+        card_or_none = self.turn_map[self.turn_index].play(count, plays)
+        if card_or_none is not None:
+            count += card_or_none
+        plays.append(card_or_none) 
+        self.turn_index = self.turn_index ^ 1 
+
     def counting(self):
-
-        print("Playing the counting game")
-
-        whose_turn = {0: self.pone, 1: self.dealer}
-        turn_index = 0 
-
         while len(self.dealer.hand) + len(self.pone.hand) > 0:
-            whose_turn[turn_index].play([]) # prevoius plays is None 
-            turn_index = turn_index ^ 1 # changes 0 to 1 and 1 to 0 
-
-    def play_counting_hand(self, n):
-        pass 
+            self.count_to_31()
 
     def count_hands(self):
         self.pone.count_hand(self.turn_card)
@@ -59,13 +61,26 @@ class Hand:
         self.dealer.count_crib(self.turn_card)
 
     def clean_up(self):
-        self.dealer.hand = []
-        self.pone.hand = []
+        self.dealer.table = []
+        self.pone.table = []
 
 
 class Game:
     def __init__(self, A, B, deal=None):
-        """Create a new Game object from two Player instances"""
+        """Create a new Game object from two Player instances
+        
+        Parameters
+        ----------
+        A: cribbage.players.Player
+            A cribbage player 
+        B: cribbage.players.Player
+            A cribbage player
+        
+        Raises
+        ------
+        WinGame
+            When game has been won by a player 
+        """
         self.A = A
         self.B = B
         if deal is None:

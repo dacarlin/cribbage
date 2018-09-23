@@ -68,7 +68,7 @@ def test_count_hands():
     cases = [(4, dealer), (4, pone)]
 
     for expected, player in cases:
-        yield assert_equal, expected, len(player.hand)
+        yield assert_equal, expected, len(player.table)
 
     cases = [(4, dealer), (0, pone)]
 
@@ -81,3 +81,11 @@ def test_single_hand():
     pone = RandomPlayer()
     hand = Hand(dealer, pone)
     hand.run()
+
+    cases = [
+        (0, dealer), 
+        (0, pone), 
+    ]
+
+    for expected, player in cases:
+        yield assert_equal, expected, len(player.hand)

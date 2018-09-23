@@ -14,9 +14,8 @@ class Card:
     vals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10] * 4
     run_vals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] * 4
 
-    def __init__(self, index=None, suit=None, rank=None):
+    def __init__(self, index=None):
         self.index = index
-        self.ontable = False
         self.value = self.vals[index]
         self.run_val = self.run_vals[index]
 

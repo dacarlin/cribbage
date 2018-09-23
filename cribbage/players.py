@@ -33,44 +33,61 @@ class Player:
         """Should return two cards from the player"""
         raise Exception("You need to implement `ask_for_discards` yourself")
 
-    def discards(self):
-        cards = self.ask_for_discards()
-        self.update_after_discards(cards)
-        return cards
 
     def update_after_discards(self, discards):
         for discard in discards:
             self.hand.remove(discard)
 
+
+    def discards(self):
+        cards = self.ask_for_discards()
+        self.update_after_discards(cards)
+        return cards
+
+
     # Counting plays
 
     def ask_for_play(self):
-        """Should return a single card from the player"""
+        """Should return a single card from the player
+
+        Private method"""
         raise Exception("You need to implement `ask_for_play` yourself")
 
-    def play(self, previous_plays):
-        while True:
-            card = self.ask_for_play(previous_plays)  # need to implement this
-            print("card in play", card)
-            if sum(previous_plays) + card.value < 32:
-                self.update_after_play(card)
-                return card
 
     def update_after_play(self, play):
+        """Private method"""
         # Mark the card
         self.table.append(play)
         self.hand.remove(play)
 
+
+    def play(self, count, previous_plays):
+        """Public method"""
+        if all(count + card > 31 for card in self.hand):
+            # say "Go"
+            return None 
+        while True:
+            card = self.ask_for_play(previous_plays)  # need to implement this
+            print("Nominated card", card)
+            if sum(previous_plays) + card.value < 32:
+                self.update_after_play(card)
+                return card
+
+
     # Scoring
 
-    def count_hand(self, turn_card):
-        """Pick up the cards from the table and count hand"""
+    def peg(self, points):
+        self.score += points
+        if self.score > 121:
+            self.win_game()
 
-        self.hand = self.table
-        self.table = []
-        score = score_hand(self.hand, turn_card)
+
+    def count_hand(self, turn_card):
+        """Count the hand (which should be on the table)"""
+        score = score_hand(self.table, turn_card)
         self.peg(score)
-        return score # why also return this? 
+        return score 
+
 
     def count_crib(self, turn_card):
         """Count crib, with side effect of pegging the score"""
@@ -78,19 +95,14 @@ class Player:
         self.peg(score)
         return score 
 
+
     def win_game(self):
         raise WinGame("Game was won by {}".format(self))
 
-    def peg(self, points):
-        self.score += points
-        if self.score > 121:
-            self.win_game()
 
     @property
     def sorted_hand(self):
         return sorted(self.hand, key=lambda c: c.index)
-
-    # Pretty print
 
     def __repr__(self):
         if self.name:
@@ -103,8 +115,10 @@ class RandomPlayer(Player):
     A player who plays randomly from legal moves
     """
 
+
     def ask_for_play(self, previous_plays):
         return self.hand[0]
+
 
     def ask_for_discards(self):
         return self.hand[0:2]
