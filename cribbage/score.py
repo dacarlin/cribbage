@@ -75,6 +75,7 @@ def score_runs(hand, turn_card):
                 break
         if points > 0:
             break
+    
     return points
 
 

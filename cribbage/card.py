@@ -1,5 +1,3 @@
-# coding: utf-8
-
 from itertools import combinations
 from random import shuffle
 import sys
@@ -59,9 +57,7 @@ class Card:
 
 
 class Deck:
-    """
-    Deck of cards
-    """
+    """Deck of cards"""
 
     def __init__(self, shuffled=True):
         self.cards = [Card(n) for n in range(52)]
