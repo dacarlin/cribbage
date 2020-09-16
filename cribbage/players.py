@@ -1,5 +1,6 @@
 from itertools import combinations
-from random import choice
+from random import choice, shuffle 
+
 import numpy as np
 from tqdm import tqdm
 
@@ -23,7 +24,7 @@ class Player:
     def __init__(self, name=None):
         self.name = name
         self.hand = []  # cards in player's hand
-        self.table = []  # cards on table in front of player
+        self.table = [] # cards on table in front of player
         self.crib = []  # cards in player's crib
         self.score = 0
 
@@ -63,22 +64,32 @@ class Player:
 
     def play(self, count, previous_plays):
         """Public method"""
-        if all(count + card > 31 for card in self.hand):
-            # say "Go"
-            return None 
+        if not self.hand:
+            print('>>> I have no cards', self)
+            return "No cards!"
+        elif all(count + card.value > 31 for card in self.hand):
+            print(">>>", self, self.hand, "I have to say 'go' on that one")
+            return "Go!"
         while True:
-            card = self.ask_for_play(previous_plays)  # need to implement this
-            print("Nominated card", card)
-            if sum(previous_plays) + card.value < 32:
+            card = self.ask_for_play()  # subclasses (that is, actual players) must implement this
+            #print("Nominated card", card)
+            if sum((pp.value for pp in previous_plays)) + card.value < 32:
                 self.update_after_play(card)
                 return card
+            else: 
+                # `self.ask_for_play` has returned a card that would put the 
+                # score above 31 but the player's hand contains at least one
+                # card that could be legally played (you're not allowed to say
+                # "go" here if you can legally play). How the code knows that 
+                # the player has a legal move is beyond me
+                print('>>> You nominated', card, 'but that is not a legal play given your hand. You must play if you can')
 
 
     # Scoring
 
     def peg(self, points):
         self.score += points
-        if self.score > 121:
+        if self.score > 120:
             self.win_game()
 
 
@@ -97,7 +108,8 @@ class Player:
 
 
     def win_game(self):
-        raise WinGame("Game was won by {}".format(self))
+        raise WinGame(f"""Game was won by {self}  """
+                      f"""{self.score} {self.table}""")
 
 
     @property
@@ -106,8 +118,8 @@ class Player:
 
     def __repr__(self):
         if self.name:
-            return self.name
-        return str(self.__class__)
+            return self.name + f'(score={self.score})'
+        return str(self.__class__) + f'(score={self.score})'
 
 
 class RandomPlayer(Player):
@@ -116,47 +128,49 @@ class RandomPlayer(Player):
     """
 
 
-    def ask_for_play(self, previous_plays):
+    def ask_for_play(self):
+        shuffle(self.hand) # this handles a case when 0 is not a legal play
         return self.hand[0]
 
 
     def ask_for_discards(self):
+        # and isn't needed here 
         return self.hand[0:2]
 
 
 class HumanPlayer(Player):
-    """
-    A human player 
-    """
+    """A human player"""
 
-    def ask_for_play(self, previous_plays):
-        """
-        Ask a human for a card, in the counting phase
-        """
 
-        # First, print out the play vector and our options
+    def ask_for_play(self):
+        """Ask a human for a card during counting"""
+        
         d = dict(enumerate(self.hand, 1))
-        print("Plays (count):", previous_plays, "({})".format(sum(previous_plays)))
-        print("Your hand:", " ".join([str(c) for c in self.hand]))
+        print(f">>> Your hand ({self}):", " ".join([str(c) for c in self.hand]))
 
         # Let us nominate a card
         while True:
-            inp = input("Card number to play: ") or "1"
+            inp = input(">>> Card number to play: ") or "1"
             if len(inp) > 0 and int(inp) in d.keys():
                 card = d[int(inp)]
                 return card
 
+
     def ask_for_discards(self):
         """After deal, ask a human for a card"""
 
-        print(self.sorted_hand)
         d = dict(enumerate(self.sorted_hand, 1))
-        discard_prompt = "Type two numbers followed by <Enter>, for example 16<Enter> to discard the first and the sixth (last) card: "
+
+        print('>>> Please nominate two cards to discard to the crib')
+        print(f'>>> {d[1]} {d[2]} {d[3]} {d[4]} {d[5]} {d[6]}')
+        #for k, v in d.items():
+        #    print(f'{k} {v}')
+        discard_prompt = ">>> "
         while True:
             inp = input(discard_prompt) or "12"
             cards = [d[int(i)] for i in inp.replace(" ", "").replace(",", "")]
             if len(cards) == 2:
-                print("Chose {} {} for crib".format(*cards))
+                print(f">>> Discarded {cards[0]} {cards[1]}")
                 return cards
 
 
@@ -173,10 +187,10 @@ class EnumerativeAIPlayer(Player):
         highest scoring move
         """
 
-        print("{} is choosing discards ...".format(self))
+        print("cribbage: {} is choosing discards".format(self))
         deck = Deck().draw(52)
         potential_cards = [n for n in deck if n not in self.hand]
-        bar = tqdm(total=227700)
+        bar = tqdm(total=226994)
         discards = []
         mean_scores = []
         for discard in combinations(self.hand, 2):  # 6 choose 2 == 15
@@ -188,7 +202,8 @@ class EnumerativeAIPlayer(Player):
             discards.append(discard)
             mean_scores.append(inner_scores.mean())
         max_index = np.argmax(mean_scores)
-        return discards[max_index]
+        return list(discards[max_index])
+
 
     def ask_for_input(self, play_vector):
         """

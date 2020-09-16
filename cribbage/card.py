@@ -47,10 +47,10 @@ class Card:
         return self.suits[self._suit]
 
     def __add__(self, other):
-        return self.value + other
+        return self.value + other.value
 
     def __radd__(self, other):
-        return self.value + other
+        return self.value + other.value
 
     def __eq__(self, other):
         return self.index == other.index

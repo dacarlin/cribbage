@@ -23,8 +23,8 @@ def main():
     parser.add_argument("--name2", help="Optional name for player 2")
     args = parser.parse_args()
 
-    player_1 = player_choices[args.player1](name=args.name1)
-    player_2 = player_choices[args.player2](name=args.name2)
+    player_1 = player_choices[args.player1](name=args.name1 or 'Player 1')
+    player_2 = player_choices[args.player2](name=args.name2 or 'Player 2')
     game = Game(player_1, player_2)
 
     try:

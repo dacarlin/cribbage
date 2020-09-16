@@ -31,7 +31,7 @@ def score_fifteens(hand, turn_card):
     points = 0
     for vector_length in [2, 3, 4, 5]:
         for vector in combinations(hand + [turn_card], vector_length):
-            if sum(vector) == 15:
+            if sum(x.value for x in vector) == 15:
                 points += 2
 
     return points
