@@ -16,7 +16,7 @@ Opponents
   wrote the optimal policy 
 
 - **Student**. This opponent is a deep neural network that has been trained 
-  via self-play using Google Keras_ and OpenAI Gym_ (see `/train` for details)
+  via self-play using Google Keras_ and OpenAI Gym_ (see ``/train`` for details)
   to execute an optimal policy 
 
 .. _Keras: https://keras.io
