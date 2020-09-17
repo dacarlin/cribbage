@@ -68,3 +68,8 @@ def test_score_of_a_hand():
 def test_right_jack():
     hand, turn_card = hand_from_str("As Ac Ah Jd Ad")
     assert 1 == score_flush_and_right_jack(hand, turn_card) 
+
+
+def test_perfect_hand():
+    hand, turn_card = hand_from_str("Jh 5d 5c 5s 5h")
+    assert 29 == score_hand(hand, turn_card)

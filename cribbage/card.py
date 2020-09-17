@@ -81,6 +81,8 @@ def card_from_str(input_str):
         if card.ascii_str == input_str:
             return card
 
+    raise ValueError(f'"{input_str}" isn\'t recognized as a card. Expected something like "Qs", "6d", "Jh"')
+
 
 def hand_from_str(input_str):
     """Create a hand from a string like "Ad 2d 5d 5h 10d"

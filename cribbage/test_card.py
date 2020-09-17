@@ -1,4 +1,7 @@
+import pytest 
+
 from .card import Card, Deck, card_from_str, hand_from_str
+
 
 
 def test_card():
@@ -33,3 +36,8 @@ def test_hand_from_str():
     cards = hand + [turn_card]
     for expect, card in zip(values, cards):
         assert expect == card.value
+
+
+def test_hand_from_bad_str():
+    with pytest.raises(ValueError):
+        _ = hand_from_str("Jh 5d 5c 5p 5h")

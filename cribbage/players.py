@@ -7,10 +7,6 @@ from tqdm import tqdm
 from .score import score_hand, score_count
 from .card import Deck
 
-# Here we define the classes for the various kinds of players
-# in the cribbage game. To define your own player, inherit from
-# the Player class and implement "ask_for_input" and "ask_for_discards"
-
 
 class WinGame(Exception):
     pass
@@ -18,7 +14,9 @@ class WinGame(Exception):
 
 class Player:
     """
-    Base class for a cribbage player
+    Here we define a base class for the various kinds of players in the 
+    cribbage game. To define your own player, inherit from this class and 
+    implement ``ask_for_input`` and ``ask_for_discards``
     """
 
     def __init__(self, name=None):
@@ -57,7 +55,7 @@ class Player:
 
     def update_after_play(self, play):
         """Private method"""
-        # Mark the card
+        
         self.table.append(play)
         self.hand.remove(play)
 
@@ -124,9 +122,8 @@ class Player:
 
 class RandomPlayer(Player):
     """
-    A player who plays randomly from legal moves
+    A player who plays randomly
     """
-
 
     def ask_for_play(self):
         shuffle(self.hand) # this handles a case when 0 is not a legal play
@@ -139,7 +136,10 @@ class RandomPlayer(Player):
 
 
 class HumanPlayer(Player):
-    """A human player"""
+    """
+    A human player. This class implements scene rendering and taking input from
+    the command line 
+    """
 
 
     def ask_for_play(self):
@@ -148,7 +148,6 @@ class HumanPlayer(Player):
         d = dict(enumerate(self.hand, 1))
         print(f">>> Your hand ({self}):", " ".join([str(c) for c in self.hand]))
 
-        # Let us nominate a card
         while True:
             inp = input(">>> Card number to play: ") or "1"
             if len(inp) > 0 and int(inp) in d.keys():
@@ -157,15 +156,14 @@ class HumanPlayer(Player):
 
 
     def ask_for_discards(self):
-        """After deal, ask a human for a card"""
+        """After deal, ask a human for two cards to discard to crib"""
 
         d = dict(enumerate(self.sorted_hand, 1))
 
         print('>>> Please nominate two cards to discard to the crib')
         print(f'>>> {d[1]} {d[2]} {d[3]} {d[4]} {d[5]} {d[6]}')
-        #for k, v in d.items():
-        #    print(f'{k} {v}')
         discard_prompt = ">>> "
+
         while True:
             inp = input(discard_prompt) or "12"
             cards = [d[int(i)] for i in inp.replace(" ", "").replace(",", "")]
@@ -181,10 +179,11 @@ class EnumerativeAIPlayer(Player):
     maximizes its score after the move
     """
 
-    def ask_for_discards(self):
+    def ask_for_discards(self, my_crib=True):
         """
         For each possible discard, score and select
-        highest scoring move
+        highest scoring move. Note: this will give opponents 
+        excellent cribs, needs a flag for minimizing 
         """
 
         print("cribbage: {} is choosing discards".format(self))
@@ -201,8 +200,14 @@ class EnumerativeAIPlayer(Player):
             inner_scores = np.array(inner_scores)
             discards.append(discard)
             mean_scores.append(inner_scores.mean())
-        max_index = np.argmax(mean_scores)
-        return list(discards[max_index])
+
+        # return either the best (if my crib) or the worst (if not)
+        if my_crib:
+            selected = np.argmax(mean_scores)
+        else:
+            selected = np.argmin(mean_scores)
+
+        return list(discards[selected])
 
 
     def ask_for_input(self, play_vector):
