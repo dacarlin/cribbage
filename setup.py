@@ -10,7 +10,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='cribbage',
-    version='1.2.1',
+    version='1.2.2',
     description='Cribbage for your command line',
     long_description=long_description,
     url='https://github.com/dacarlin/cribbage',
