@@ -210,7 +210,7 @@ class EnumerativeAIPlayer(Player):
         return list(discards[selected])
 
 
-    def ask_for_input(self, play_vector):
+    def ask_for_play(self):
         """
         Calculate points for each possible play in your hand
         and choose the one that maximizes the points
@@ -222,6 +222,7 @@ class EnumerativeAIPlayer(Player):
             plays.append(card)
             scores.append(score_count(play_vector + [card]))
         max_index = np.argmax(scores)
+
         return plays[max_index]
 
 
