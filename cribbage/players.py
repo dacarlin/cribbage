@@ -28,7 +28,7 @@ class Player:
 
     # Discards
 
-    def ask_for_discards():
+    def ask_for_discards(self):
         """Should return two cards from the player"""
         raise Exception("You need to implement `ask_for_discards` yourself")
 
@@ -46,7 +46,7 @@ class Player:
 
     # Counting plays
 
-    def ask_for_play(self):
+    def ask_for_play(self, plays):
         """Should return a single card from the player
 
         Private method"""
@@ -60,7 +60,7 @@ class Player:
         self.hand.remove(play)
 
 
-    def play(self, count, previous_plays):
+    def play(self, count, plays):
         """Public method"""
         if not self.hand:
             print('>>> I have no cards', self)
@@ -69,9 +69,10 @@ class Player:
             print(">>>", self, self.hand, "I have to say 'go' on that one")
             return "Go!"
         while True:
-            card = self.ask_for_play()  # subclasses (that is, actual players) must implement this
+            print(plays)
+            card = self.ask_for_play(plays)  # subclasses (that is, actual players) must implement this
             #print("Nominated card", card)
-            if sum((pp.value for pp in previous_plays)) + card.value < 32:
+            if sum((pp.value for pp in plays)) + card.value < 32:
                 self.update_after_play(card)
                 return card
             else: 
@@ -125,7 +126,7 @@ class RandomPlayer(Player):
     A player who plays randomly
     """
 
-    def ask_for_play(self):
+    def ask_for_play(self, plays):
         shuffle(self.hand) # this handles a case when 0 is not a legal play
         return self.hand[0]
 
@@ -135,6 +136,9 @@ class RandomPlayer(Player):
         return self.hand[0:2]
 
 
+NondeterministicAIPlayer = RandomPlayer
+
+
 class HumanPlayer(Player):
     """
     A human player. This class implements scene rendering and taking input from
@@ -142,7 +146,7 @@ class HumanPlayer(Player):
     """
 
 
-    def ask_for_play(self):
+    def ask_for_play(self, plays):
         """Ask a human for a card during counting"""
         
         d = dict(enumerate(self.hand, 1))
@@ -179,38 +183,51 @@ class EnumerativeAIPlayer(Player):
     maximizes its score after the move
     """
 
-    def ask_for_discards(self, my_crib=True):
+    def ask_for_discards(self, my_crib=True, choose='mean'):
         """
         For each possible discard, score and select
-        highest scoring move. Note: this will give opponents 
-        excellent cribs, needs a flag for minimizing 
+        highest scoring move
+
+        Parameters
+        ----------
+        my_crib: bool
+            Is it my crib?
+        choose: str
+            Choose the discard with either the best `"mean"` possible score or the
+            best `"max"` possible score given the six cards in my hand
         """
 
-        print("cribbage: {} is choosing discards".format(self))
+        #print("cribbage: {} is choosing discards".format(self))
         deck = Deck().draw(52)
         potential_cards = [n for n in deck if n not in self.hand]
-        bar = tqdm(total=226994)
+        assert 6 == len(self.hand)
+        assert 52 - 6 == len(potential_cards)
+
+        #bar = tqdm(total=226994)
         discards = []
-        mean_scores = []
+        scores = []
         for discard in combinations(self.hand, 2):  # 6 choose 2 == 15
             inner_scores = []
             for pot in combinations(potential_cards, 3):  # 46 choose 3 == 15,180
                 inner_scores.append(score_hand([*discard, *pot[:-1]], pot[-1]))
-                bar.update(1)
+                #bar.update(1)
             inner_scores = np.array(inner_scores)
             discards.append(discard)
-            mean_scores.append(inner_scores.mean())
+            if choose == 'mean':
+                scores.append(inner_scores.mean())
+            elif choose == 'max':
+                scores.append(inner_scores.max())
 
         # return either the best (if my crib) or the worst (if not)
         if my_crib:
-            selected = np.argmax(mean_scores)
+            selected = np.argmax(scores)
         else:
-            selected = np.argmin(mean_scores)
+            selected = np.argmin(scores)
 
         return list(discards[selected])
 
 
-    def ask_for_play(self):
+    def ask_for_play(self, plays):
         """
         Calculate points for each possible play in your hand
         and choose the one that maximizes the points
@@ -220,37 +237,22 @@ class EnumerativeAIPlayer(Player):
         plays = []
         for card in self.hand:
             plays.append(card)
-            scores.append(score_count(play_vector + [card]))
+            scores.append(score_count(plays + [card]))
         max_index = np.argmax(scores)
 
         return plays[max_index]
 
 
-# class TrainedAIPlayer(Player):
-#     """
-#     A player that makes choices based on previous games
-#     """
+class StudentAIPlayer(Player):
 
-#     def __init__(self, name=""):
-#         # override this constructor becasue I want to
-#         # load the ML model in when we init AIPlayer instance
-#         self.name = name
-#         self.hand = []
-#         self.score = 0
-#         self.debug = False
-#         self.model = load_trained_model()  # trained model we can ask directly for plays
+    def __init__(self):
+        self.model = lambda x: self.hand[:2]
 
-#     def ask_for_input(self, play_vector):
-#         card = self.model.ask_for_pegging_play(play_vector, self.in_hand)
-#         card.ontable = True
-#         return card
+    def ask_for_discards(self):
+        return self._ask_model_for_discards()
 
-#     def ask_for_discards(self):
-#         cards = self.model.ask_model_for_discard(
-#             self.hand
-#         )  # note: returns card objects
-#         self.hand = [n for n in self.hand if n not in cards]
-#         return cards
+    def ask_for_play(self, plays):
+        return self._ask_model_for_play()
 
-
-NondeterministicAIPlayer = RandomPlayer
+    def _ask_model_for_discards(self):
+        return self.model(self.hand)
