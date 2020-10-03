@@ -76,7 +76,8 @@ def test_count_hands():
         assert expected == len(player.crib)
 
 
-def test_single_hand():
+@pytest.mark.parametrize('n', range(50))
+def test_single_hand(n):
     dealer = RandomPlayer()
     pone = RandomPlayer()
     hand = Hand(dealer, pone)
@@ -96,5 +97,15 @@ def test_single_game():
     pone = RandomPlayer()
     game = Game(dealer, pone)
     
+    with pytest.raises(WinGame):
+        game.run()
+
+
+@pytest.mark.parametrize('n', range(10))
+def test_many_games(n):
+    dealer = RandomPlayer()
+    pone = RandomPlayer()
+    game = Game(dealer, pone)
+
     with pytest.raises(WinGame):
         game.run()
