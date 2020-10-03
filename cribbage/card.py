@@ -1,63 +1,74 @@
-from itertools import combinations
 from random import shuffle
-import sys
+
+
+suits = "♢♣♡♠"
+suits_ascii = "dchs"
+ranks = ["A", 2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "Q", "K"]
+vals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
+run_vals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
 
 
 class Card:
-    """A playing card"""
+    """
+    A playing card
 
-    suits = "♢♣♡♠"
-    suits_ascii = "dchs"
-    ranks = ["A", 2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "Q", "K"]
-    vals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10] * 4
-    run_vals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] * 4
+    Attributes
+    ----------
+    index: int
+        Canonical playing card sorting index in the range (0, 52)
+
+    rank: int
+        Numerical rank of the card in the range (0, 13). For a graphical
+        string representation, use :meth:`rank_str`
+
+    suit: int
+        Integer representation of one of four suits
+
+    rank_str: str
+        String representation of a card's rank. For example `Card(0).rank_str`
+        (the rank of the Ace of Diamonds) is "A"
+
+    value: int
+        Numerical value of the card. In Cribbage, Ace is one, number
+        cards are their number, and face cards all count ten
+
+    run_val: int
+        Same as value except for Jack, Queen, King, which take the
+        values 11, 12, 13. Used for scoring runs
+
+    """
 
     def __init__(self, index=None):
-        self.index = index
-        self.value = self.vals[index]
-        self.run_val = self.run_vals[index]
+        """Create a playing card from an index in the range (0, 52)"""
 
-        self._rank = self.get_rank()
-        self._suit = self.get_suit()
+        assert index in range(0, 52), "Create a card with an integer in the range (0, 52)"
 
-    def get_rank(self):
-        return self.index % 13
+        self.index: int = index
 
-    def get_suit(self):
-        return self.index // 13
+        self.rank: int  = index % 13
+        self.suit: int  = index // 13
+
+        self.value: int = vals[self.rank]
+        self.run_val: int = run_vals[self.rank]
+        self.rank_str: str = ranks[self.rank]
+        self.ascii_str: str = f"{ranks[self.rank]}{suits_ascii[self.suit]}"
 
     def __repr__(self):
-        rank = self.ranks[self.get_rank()]
-        suit = self.suits[self.get_suit()]
-        return "{}{}".format(rank, suit)
-
-    @property
-    def ascii_str(self):
-        rank = self.ranks[self.get_rank()]
-        suit = self.suits_ascii[self.get_suit()]
-        self._ascii_str = "{}{}".format(rank, suit)
-        return self._ascii_str
-
-    @property
-    def rank(self):
-        return self.ranks[self._rank]
-
-    @property
-    def suit(self):
-        return self.suits[self._suit]
-
-    def __add__(self, other):
-        return self.value + other
-
-    def __radd__(self, other):
-        return self.value + other
+        return f"{ranks[self.rank]}{suits[self.suit]}"
 
     def __eq__(self, other):
         return self.index == other.index
 
 
 class Deck:
-    """Deck of cards"""
+    """Deck of cards
+
+    Methods
+    -------
+    draw: iterable of :class:`cribbage.Card`
+        A generator that produces :class:`cribbage.Card` objects (from a
+        shuffled deck, by default)
+    """
 
     def __init__(self, shuffled=True):
         self.cards = [Card(n) for n in range(52)]
@@ -65,10 +76,8 @@ class Deck:
             shuffle(self.cards)
 
     def draw(self, n=1):
-        result = []
         for i in range(n):
-            result.append(self.cards.pop())
-        return result
+            yield self.cards.pop()
 
 
 def card_from_str(input_str):
@@ -80,6 +89,8 @@ def card_from_str(input_str):
     for card in cards:
         if card.ascii_str == input_str:
             return card
+
+    raise ValueError(f'"{input_str}" isn\'t recognized as a card. Expected something like "Qs", "6d", "Jh"')
 
 
 def hand_from_str(input_str):
@@ -94,9 +105,10 @@ def hand_from_str(input_str):
     Returns
     -------
     hand: list of Card
-        Four cards 
+        A list of four :class:`cribbage.Card` objects as specified
 
     turn_card: Card
+        A single card
     """
 
     hand = list(map(card_from_str, input_str.split()))

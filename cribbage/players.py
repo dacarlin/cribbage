@@ -1,14 +1,11 @@
 from itertools import combinations
-from random import choice
+from random import choice, shuffle 
+
 import numpy as np
 from tqdm import tqdm
 
 from .score import score_hand, score_count
 from .card import Deck
-
-# Here we define the classes for the various kinds of players
-# in the cribbage game. To define your own player, inherit from
-# the Player class and implement "ask_for_input" and "ask_for_discards"
 
 
 class WinGame(Exception):
@@ -17,13 +14,15 @@ class WinGame(Exception):
 
 class Player:
     """
-    Base class for a cribbage player
+    Here we define a base class for the various kinds of players in the 
+    cribbage game. To define your own player, inherit from this class and 
+    implement ``ask_for_input`` and ``ask_for_discards``
     """
 
     def __init__(self, name=None):
         self.name = name
         self.hand = []  # cards in player's hand
-        self.table = []  # cards on table in front of player
+        self.table = [] # cards on table in front of player
         self.crib = []  # cards in player's crib
         self.score = 0
 
@@ -56,29 +55,39 @@ class Player:
 
     def update_after_play(self, play):
         """Private method"""
-        # Mark the card
+        
         self.table.append(play)
         self.hand.remove(play)
 
 
     def play(self, count, previous_plays):
         """Public method"""
-        if all(count + card > 31 for card in self.hand):
-            # say "Go"
-            return None 
+        if not self.hand:
+            print('>>> I have no cards', self)
+            return "No cards!"
+        elif all(count + card.value > 31 for card in self.hand):
+            print(">>>", self, self.hand, "I have to say 'go' on that one")
+            return "Go!"
         while True:
-            card = self.ask_for_play(previous_plays)  # need to implement this
-            print("Nominated card", card)
-            if sum(previous_plays) + card.value < 32:
+            card = self.ask_for_play()  # subclasses (that is, actual players) must implement this
+            #print("Nominated card", card)
+            if sum((pp.value for pp in previous_plays)) + card.value < 32:
                 self.update_after_play(card)
                 return card
+            else: 
+                # `self.ask_for_play` has returned a card that would put the 
+                # score above 31 but the player's hand contains at least one
+                # card that could be legally played (you're not allowed to say
+                # "go" here if you can legally play). How the code knows that 
+                # the player has a legal move is beyond me
+                print('>>> You nominated', card, 'but that is not a legal play given your hand. You must play if you can')
 
 
     # Scoring
 
     def peg(self, points):
         self.score += points
-        if self.score > 121:
+        if self.score > 120:
             self.win_game()
 
 
@@ -97,7 +106,8 @@ class Player:
 
 
     def win_game(self):
-        raise WinGame("Game was won by {}".format(self))
+        raise WinGame(f"""Game was won by {self}  """
+                      f"""{self.score} {self.table}""")
 
 
     @property
@@ -106,57 +116,59 @@ class Player:
 
     def __repr__(self):
         if self.name:
-            return self.name
-        return str(self.__class__)
+            return self.name + f'(score={self.score})'
+        return str(self.__class__) + f'(score={self.score})'
 
 
 class RandomPlayer(Player):
     """
-    A player who plays randomly from legal moves
+    A player who plays randomly
     """
 
-
-    def ask_for_play(self, previous_plays):
+    def ask_for_play(self):
+        shuffle(self.hand) # this handles a case when 0 is not a legal play
         return self.hand[0]
 
 
     def ask_for_discards(self):
+        # and isn't needed here 
         return self.hand[0:2]
 
 
 class HumanPlayer(Player):
     """
-    A human player 
+    A human player. This class implements scene rendering and taking input from
+    the command line 
     """
 
-    def ask_for_play(self, previous_plays):
-        """
-        Ask a human for a card, in the counting phase
-        """
 
-        # First, print out the play vector and our options
+    def ask_for_play(self):
+        """Ask a human for a card during counting"""
+        
         d = dict(enumerate(self.hand, 1))
-        print("Plays (count):", previous_plays, "({})".format(sum(previous_plays)))
-        print("Your hand:", " ".join([str(c) for c in self.hand]))
+        print(f">>> Your hand ({self}):", " ".join([str(c) for c in self.hand]))
 
-        # Let us nominate a card
         while True:
-            inp = input("Card number to play: ") or "1"
+            inp = input(">>> Card number to play: ") or "1"
             if len(inp) > 0 and int(inp) in d.keys():
                 card = d[int(inp)]
                 return card
 
-    def ask_for_discards(self):
-        """After deal, ask a human for a card"""
 
-        print(self.sorted_hand)
+    def ask_for_discards(self):
+        """After deal, ask a human for two cards to discard to crib"""
+
         d = dict(enumerate(self.sorted_hand, 1))
-        discard_prompt = "Type two numbers followed by <Enter>, for example 16<Enter> to discard the first and the sixth (last) card: "
+
+        print('>>> Please nominate two cards to discard to the crib')
+        print(f'>>> {d[1]} {d[2]} {d[3]} {d[4]} {d[5]} {d[6]}')
+        discard_prompt = ">>> "
+
         while True:
             inp = input(discard_prompt) or "12"
             cards = [d[int(i)] for i in inp.replace(" ", "").replace(",", "")]
             if len(cards) == 2:
-                print("Chose {} {} for crib".format(*cards))
+                print(f">>> Discarded {cards[0]} {cards[1]}")
                 return cards
 
 
@@ -167,16 +179,17 @@ class EnumerativeAIPlayer(Player):
     maximizes its score after the move
     """
 
-    def ask_for_discards(self):
+    def ask_for_discards(self, my_crib=True):
         """
         For each possible discard, score and select
-        highest scoring move
+        highest scoring move. Note: this will give opponents 
+        excellent cribs, needs a flag for minimizing 
         """
 
-        print("{} is choosing discards ...".format(self))
+        print("cribbage: {} is choosing discards".format(self))
         deck = Deck().draw(52)
         potential_cards = [n for n in deck if n not in self.hand]
-        bar = tqdm(total=227700)
+        bar = tqdm(total=226994)
         discards = []
         mean_scores = []
         for discard in combinations(self.hand, 2):  # 6 choose 2 == 15
@@ -187,10 +200,17 @@ class EnumerativeAIPlayer(Player):
             inner_scores = np.array(inner_scores)
             discards.append(discard)
             mean_scores.append(inner_scores.mean())
-        max_index = np.argmax(mean_scores)
-        return discards[max_index]
 
-    def ask_for_input(self, play_vector):
+        # return either the best (if my crib) or the worst (if not)
+        if my_crib:
+            selected = np.argmax(mean_scores)
+        else:
+            selected = np.argmin(mean_scores)
+
+        return list(discards[selected])
+
+
+    def ask_for_play(self):
         """
         Calculate points for each possible play in your hand
         and choose the one that maximizes the points
@@ -202,6 +222,7 @@ class EnumerativeAIPlayer(Player):
             plays.append(card)
             scores.append(score_count(play_vector + [card]))
         max_index = np.argmax(scores)
+
         return plays[max_index]
 
 

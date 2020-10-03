@@ -1,7 +1,7 @@
-from nose.tools import assert_equal
+import pytest 
 
 from .game import Hand, Game
-from .players import RandomPlayer
+from .players import RandomPlayer, WinGame
 
 
 def test_deal():
@@ -13,7 +13,7 @@ def test_deal():
 
     cases = [(6, dealer), (6, pone)]
     for expected, player in cases:
-        yield assert_equal, expected, len(player.hand)
+        assert expected == len(player.hand)
 
 
 def test_discards():
@@ -26,7 +26,7 @@ def test_discards():
 
     cases = [(4, dealer), (4, pone)]
     for expected, player in cases:
-        yield assert_equal, expected, len(player.hand)
+        assert expected == len(player.hand)
 
 
 def test_counting():
@@ -40,19 +40,19 @@ def test_counting():
     cases = [(4, dealer), (4, pone)]
 
     for expected, player in cases:
-        yield assert_equal, expected, len(player.hand)
+        assert expected == len(player.hand)
 
     hand.counting()
 
     cases = [(0, dealer), (0, pone)]
 
     for expected, player in cases:
-        yield assert_equal, expected, len(player.hand)
+        assert expected == len(player.hand)
 
     cases = [(4, dealer), (4, pone)]
 
     for expected, player in cases:
-        yield assert_equal, expected, len(player.table)
+        assert expected == len(player.table)
 
 
 def test_count_hands():
@@ -68,15 +68,16 @@ def test_count_hands():
     cases = [(4, dealer), (4, pone)]
 
     for expected, player in cases:
-        yield assert_equal, expected, len(player.table)
+        assert expected == len(player.table)
 
     cases = [(4, dealer), (0, pone)]
 
     for expected, player in cases:
-        yield assert_equal, expected, len(player.crib)
+        assert expected == len(player.crib)
 
 
-def test_single_hand():
+@pytest.mark.parametrize('n', range(50))
+def test_single_hand(n):
     dealer = RandomPlayer()
     pone = RandomPlayer()
     hand = Hand(dealer, pone)
@@ -88,4 +89,23 @@ def test_single_hand():
     ]
 
     for expected, player in cases:
-        yield assert_equal, expected, len(player.hand)
+        assert expected == len(player.hand)
+
+
+def test_single_game():
+    dealer = RandomPlayer()
+    pone = RandomPlayer()
+    game = Game(dealer, pone)
+    
+    with pytest.raises(WinGame):
+        game.run()
+
+
+@pytest.mark.parametrize('n', range(10))
+def test_many_games(n):
+    dealer = RandomPlayer()
+    pone = RandomPlayer()
+    game = Game(dealer, pone)
+
+    with pytest.raises(WinGame):
+        game.run()
