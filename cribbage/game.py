@@ -1,19 +1,19 @@
 from random import choice
 
-from .score import score_hand, score_count
 from .card import Deck
 
 
 class Hand:
     def __init__(self, dealer, pone):
-        """Create a new hand
+        """
+        Create a new hand
 
         Parameters
         ----------
-        dealer: Player
+        dealer: cribbage.Player
             The player who is the dealer 
         
-        pone: Player
+        pone: cribbage.Player
             The player who is the opponent 
         """
 
@@ -41,9 +41,9 @@ class Hand:
         """Create a new deck and deal cards to players"""
 
         deck = Deck()
-        self.dealer.hand = deck.draw(6)
-        self.pone.hand = deck.draw(6)
-        self.turn_card = deck.draw(1)[0]
+        self.dealer.hand = list(deck.draw(6))
+        self.pone.hand = list(deck.draw(6))
+        self.turn_card = next(deck.draw(1))
 
 
     def discards(self):
