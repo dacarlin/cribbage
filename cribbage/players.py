@@ -1,8 +1,7 @@
 from itertools import combinations
-from random import choice, shuffle 
+from random import shuffle
 
 import numpy as np
-from tqdm import tqdm
 
 from .score import score_hand, score_count
 from .card import Deck
