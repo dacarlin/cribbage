@@ -1,7 +1,7 @@
 from itertools import combinations
 
 
-def score_hand(hand, turn_card, is_crib=False):
+def score_hand(hand, turn_card) -> int:
     """Score a valid cribbage hand
     
     Parameters
@@ -13,10 +13,10 @@ def score_hand(hand, turn_card, is_crib=False):
         The turn card 
     """
 
-    if len(hand) != 4:
-        raise ValueError(
-            "To score a hand, it must have 4 cards, not {}".format(len(hand))
-        )
+    #if len(hand) != 4:
+    #    raise ValueError(
+    #        "To score a hand, it must have 4 cards, not {}".format(len(hand))
+    #    )
 
     points = 0
     points += score_fifteens(hand, turn_card)
@@ -25,6 +25,12 @@ def score_hand(hand, turn_card, is_crib=False):
     points += score_flush_and_right_jack(hand, turn_card)
 
     return points
+
+
+def score_play(plays):
+    """Score a play during counting"""
+    assert len(plays) > 1
+    return score_hand(plays[:-1], plays[-1])
 
 
 def score_fifteens(hand, turn_card):

@@ -255,3 +255,6 @@ class StudentAIPlayer(Player):
 
     def _ask_model_for_discards(self):
         return self.model(self.hand)
+
+    def _ask_model_for_play(self):
+        return self.model(self.table)

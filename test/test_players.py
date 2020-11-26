@@ -2,7 +2,7 @@ import pytest
 
 from .players import WinGame, Player, EnumerativeAIPlayer, StudentAIPlayer, RandomPlayer
 from .game import Hand
-from .card import hand_from_str
+from .card import cards_from_str
 
 
 def test_peg():
@@ -20,7 +20,7 @@ def test_win():
 @pytest.mark.slow
 def test_enumerative_ai_chooses_good_crib():
     player = EnumerativeAIPlayer()
-    player.hand, turn_card = hand_from_str("5d 5h Ad 3s 7h 9s 9h")  # note: last card not used
+    player.hand = cards_from_str("5d 5h Ad 3s 7h 9s")
     discards = player.ask_for_discards(my_crib=True)
     assert all(x.value == 5 for x in discards)
 
@@ -28,7 +28,7 @@ def test_enumerative_ai_chooses_good_crib():
 @pytest.mark.slow
 def test_enumerative_ai_chooses_bad_crib():
     player = EnumerativeAIPlayer()
-    player.hand, turn_card = hand_from_str("5d 5h Ad 3s 8h 9s 9h")  # note: last card not used
+    player.hand = cards_from_str("5d 5h Ad 3s 8h 9s")
     discards = player.ask_for_discards(my_crib=False)
     assert all(x.value != 5 for x in discards)
 
@@ -36,14 +36,15 @@ def test_enumerative_ai_chooses_bad_crib():
 def test_enumerative_ai_counting():
     a = EnumerativeAIPlayer()
     b = RandomPlayer()
-    a.hand, _ = hand_from_str("Ad Ac 6d 9d Ks")
-    b.hand, _ = hand_from_str("Ah As 6c 9c Kh")
+    a.hand = cards_from_str("Ad Ac 6d 9d")
+    b.hand = cards_from_str("Ah As 6c 9c")
     hand = Hand(b, a)
     hand.counting()
 
+
 def test_student_chooses_good_crib():
     player = StudentAIPlayer()
-    player.hand, _ = hand_from_str("5d 5h Ad 3s 7h 9s 9h")
+    player.hand = cards_from_str("5d 5h Ad 3s 7h 9s")
     discards = player.ask_for_discards()
     assert all(x.rank == 5 for x in discards)
 
