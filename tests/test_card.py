@@ -1,6 +1,6 @@
 import pytest
 
-from .card import Card, Deck, card_from_str, cards_from_str
+from cribbage.card import Card, Deck, card_from_str, cards_from_str
 
 
 def test_card():

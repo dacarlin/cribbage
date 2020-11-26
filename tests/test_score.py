@@ -1,7 +1,7 @@
 import pytest
 
-from .card import Deck, cards_from_str
-from .score import (
+from cribbage.card import Deck, cards_from_str
+from cribbage.score import (
     score_hand,
     score_runs,
     score_fifteens,

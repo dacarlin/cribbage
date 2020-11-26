@@ -1,8 +1,8 @@
 import pytest 
 
-from .players import WinGame, Player, EnumerativeAIPlayer, StudentAIPlayer, RandomPlayer
-from .game import Hand
-from .card import cards_from_str
+from cribbage.players import WinGame, Player, EnumerativeAIPlayer, StudentAIPlayer, RandomPlayer
+from cribbage.game import Hand
+from cribbage.card import cards_from_str
 
 
 def test_peg():
