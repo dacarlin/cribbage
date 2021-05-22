@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "cribbage"
-version = "0.1.0"
+version = "1.2.2"
 description = "Cribbage for your command line"
-authors = ["Alex Carlin <alxcarln@gmail.com>"]
+authors = ["Alex Carlin <alex@inkisbetter.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
