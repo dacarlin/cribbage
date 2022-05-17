@@ -1,7 +1,7 @@
 import pytest 
 
-from .game import Hand, Game
-from .players import RandomPlayer, WinGame
+from cribbage.game import Hand, Game
+from cribbage.players import RandomPlayer, WinGame
 
 
 def test_deal():

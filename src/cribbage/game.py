@@ -25,10 +25,8 @@ class Hand:
         self.plays = [] 
         self.count = None
 
-
     def run(self):
         """Run the entire hand"""
-
         self.deal()
         self.discards()
         print(f'Turn card {self.turn_card}')
@@ -36,29 +34,23 @@ class Hand:
         self.count_hands()
         self.clean_up()
 
-
     def deal(self):
         """Create a new deck and deal cards to players"""
-
         deck = Deck()
         self.dealer.hand = list(deck.draw(6))
         self.pone.hand = list(deck.draw(6))
         self.turn_card = next(deck.draw(1))
 
-
     def discards(self):
         """Get discards from both players and add them to crib"""
-
         d1 = self.dealer.discards()
         d2 = self.pone.discards()
         self.dealer.crib = d1 + d2
-
 
     def count_to_31(self):
         """Starting with two players with at least one card between them, 
         and a count of 0, start the counting portion of the game given 
         information about who"""
-
         if not self.dealer.hand:
             print('dealer has no cards')
         if not self.pone.hand:
@@ -100,12 +92,10 @@ class Hand:
         
             turn = turn ^ 1 
  
-
     def counting(self):
         print(f'Counting starts with {self.pone}')
         while len(self.dealer.hand) + len(self.pone.hand) > 0:
             self.count_to_31()
-
 
     def count_hands(self):
         print('Counting hands')
@@ -118,7 +108,6 @@ class Hand:
         
         _ = self.dealer.count_crib(self.turn_card)
         print('crib', self.dealer, self.dealer.crib, _) 
-
 
     def clean_up(self):
         self.dealer.table = []
@@ -147,7 +136,6 @@ class Game:
         if deal is None:
             self.deal = choice((0, 1))
             print(f"############\n# Cribbage # \n############ \nStarting a new game with dealer \"{[self.A, self.B][self.deal]}\" and opponent \"{[self.A, self.B][self.deal ^ 1]}\"")
-
 
     def run(self):
         print('score', self.A, self.B)

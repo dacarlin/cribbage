@@ -39,15 +39,19 @@ class Card:
     """
 
     def __init__(self, index=None):
-        """Create a playing card from an index in the range (0, 52)"""
+        """
+        Create a playing card from an index in the range (0, 52)
+
+        Parameters
+        ----------
+        index: int
+            Index in the range (0, 52)
+        """
 
         assert index in range(0, 52), "Create a card with an integer in the range (0, 52)"
-
         self.index: int = index
-
-        self.rank: int  = index % 13
-        self.suit: int  = index // 13
-
+        self.rank: int = index % 13
+        self.suit: int = index // 13
         self.value: int = vals[self.rank]
         self.run_val: int = run_vals[self.rank]
         self.rank_str: str = ranks[self.rank]
@@ -61,7 +65,8 @@ class Card:
 
 
 class Deck:
-    """Deck of cards
+    """
+    Deck of cards
 
     Methods
     -------
@@ -81,7 +86,7 @@ class Deck:
 
 
 def card_from_str(input_str):
-    """Create a Card instance from a string"""
+    """Create a :class:`cribbage.Card` instance from a string like "6h" """
 
     deck = Deck()
     cards = list(deck.draw(52))
@@ -93,8 +98,10 @@ def card_from_str(input_str):
     raise ValueError(f'"{input_str}" isn\'t recognized as a card. Expected something like "Qs", "6d", "Jh"')
 
 
-def hand_from_str(input_str):
-    """Create a hand from a string like "Ad 2d 5d 5h 10d"
+def cards_from_str(input_str):
+    """
+    Create cards from a string like "Ad 2d 5d 5h 10d" or "6h 6s" (any
+    number of cards with duplicates allowed)
 
     Parameters
     ----------
@@ -111,5 +118,4 @@ def hand_from_str(input_str):
         A single card
     """
 
-    hand = list(map(card_from_str, input_str.split()))
-    return hand[:-1], hand[-1]
+    return list(map(card_from_str, input_str.split()))

@@ -1,7 +1,7 @@
 from itertools import combinations
 
 
-def score_hand(hand, turn_card, is_crib=False):
+def score_hand(hand, turn_card) -> int:
     """Score a valid cribbage hand
     
     Parameters
@@ -13,10 +13,10 @@ def score_hand(hand, turn_card, is_crib=False):
         The turn card 
     """
 
-    if len(hand) != 4:
-        raise ValueError(
-            "To score a hand, it must have 4 cards, not {}".format(len(hand))
-        )
+    #if len(hand) != 4:
+    #    raise ValueError(
+    #        "To score a hand, it must have 4 cards, not {}".format(len(hand))
+    #    )
 
     points = 0
     points += score_fifteens(hand, turn_card)
@@ -25,6 +25,12 @@ def score_hand(hand, turn_card, is_crib=False):
     points += score_flush_and_right_jack(hand, turn_card)
 
     return points
+
+
+def score_play(plays):
+    """Score a play during counting"""
+    assert len(plays) > 1
+    return score_hand(plays[:-1], plays[-1])
 
 
 def score_fifteens(hand, turn_card):
@@ -84,10 +90,10 @@ def score_count(plays):
     """Score a play vector"""
 
     score = 0
-    if not plays or len(plays) < 2:
+    if len(plays) < 2:
         return score
 
-    count = sum(plays)
+    count = sum(card.value for card in plays)
     if count == 15 or count == 31:
         score += 2
 
@@ -95,6 +101,8 @@ def score_count(plays):
         score += 2
     if len(plays) > 2 and plays[-2].rank == plays[-3].rank:
         score += 4
+    if len(plays) > 3 and plays[-2].rank == plays[-3].rank == plays[-4].rank:
+        score += 6
         # hack? or does that actually make sense?
 
     return score
