@@ -242,7 +242,7 @@ class EnumerativeAIPlayer(Player):
         return plays[max_index]
 
 
-class StudentAIPlayer(Player):
+class TrainedAIPlayer(Player):
 
     def __init__(self):
         self.model = lambda x: self.hand[:2]

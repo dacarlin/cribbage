@@ -1,6 +1,6 @@
 import pytest 
 
-from cribbage.players import WinGame, Player, EnumerativeAIPlayer, StudentAIPlayer, RandomPlayer
+from cribbage.players import WinGame, Player, EnumerativeAIPlayer, TrainedAIPlayer, RandomPlayer
 from cribbage.game import Hand
 from cribbage.card import cards_from_str
 
@@ -43,8 +43,14 @@ def test_enumerative_ai_counting():
 
 
 def test_student_chooses_good_crib():
-    player = StudentAIPlayer()
+    player = TrainedAIPlayer()
     player.hand = cards_from_str("5d 5h Ad 3s 7h 9s")
     discards = player.ask_for_discards()
     assert all(x.rank == 5 for x in discards)
 
+
+def test_trained_chooses_good_crib():
+    player = TrainedAIPlayer()
+    player.hand = cards_from_str("5d 5h As 3h 9s 7d")
+    discards = player.ask_for_discards()
+    assert all(x.rank == 5 for x in discards) 
