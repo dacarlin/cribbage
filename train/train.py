@@ -3,7 +3,7 @@ from cribbage.players import NondeterministicAIPlayer, WinGame
 
 
 def main():
-    # main script for running game 
+    # main script for running game, with an extra five words!
     player_1 = NondeterministicAIPlayer(name="Player 1")
     player_2 = NondeterministicAIPlayer(name="Player 2")
     game = Game(player_1, player_2)
