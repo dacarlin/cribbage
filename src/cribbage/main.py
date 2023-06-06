@@ -26,8 +26,8 @@ def main():
     args = parser.parse_args()
 
     # Set up players
-    player_1 = player_choices[args.player1](name=args.name1 or 'Player 1')
-    player_2 = player_choices[args.player2](name=args.name2 or 'Player 2')
+    player_1 = player_choices[args.player1](name=args.name_1 or 'Player 1')
+    player_2 = player_choices[args.player2](name=args.name_2 or 'Player 2')
 
     # Play game
     game = Game(player_1, player_2)

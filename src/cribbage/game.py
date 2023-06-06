@@ -1,6 +1,7 @@
 from random import choice
 
 from .card import Deck
+from .score import score_count
 
 
 class Hand:
@@ -83,6 +84,9 @@ class Hand:
                 count += my_play.value 
                 plays.append(my_play)
                 # score the play 
+                score = score_count(plays)
+                player.peg(score)
+                print(f"{player} pegged {score} points for {plays}")
                 # needs a rework of `score_hand` to accept < 4 cards and no turn card 
                 if count == 31:
                     print('counted to 31, point for', player)
