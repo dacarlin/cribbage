@@ -31,12 +31,13 @@ Install using `pip`
 pip install cribbage 
 ```
 
-Or install from the source using Poetry (for development, to run the tests)  
+Or install from the source (for development, to run the tests)  
 
 ```
 git clone git@github.com:dacarlin/cribbage.git
-poetry install 
-poetry run pytest 
+cd cribbage
+pip install . 
+pytest  
 ```
 
 
