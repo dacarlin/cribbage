@@ -1,6 +1,7 @@
 from itertools import combinations
 from random import shuffle
 
+from rich import print 
 import numpy as np
 
 from .score import score_hand, score_count

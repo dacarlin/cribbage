@@ -3,6 +3,7 @@ from random import shuffle
 
 suits = "♢♣♡♠"
 suits_ascii = "dchs"
+suits_emoji = [":diamonds:", ":clubs:", ":hearts:", ":spades:"]
 ranks = ["A", 2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "Q", "K"]
 vals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
 run_vals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
@@ -58,7 +59,7 @@ class Card:
         self.ascii_str: str = f"{ranks[self.rank]}{suits_ascii[self.suit]}"
 
     def __repr__(self):
-        return f"{ranks[self.rank]}{suits[self.suit]}"
+        return f"{ranks[self.rank]}{suits_emoji[self.suit]}"
 
     def __eq__(self, other):
         return self.index == other.index

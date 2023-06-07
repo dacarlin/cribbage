@@ -8,7 +8,7 @@ version = "1.3.3"
 authors = [{name="Alex Carlin", email="alex@inkisbetter.com" }]
 description = "Cribbage for your command line"
 readme = "README.md"
-dependencies = ["numpy", "tqdm", "pytest"]
+dependencies = ["numpy", "tqdm", "pytest", "rich"]
 requires-python = ">=3.9"
 
 [project.scripts]
