@@ -1,38 +1,6 @@
 from itertools import combinations
 
 
-def score_hand(hand, turn_card) -> int:
-    """Score a valid cribbage hand
-    
-    Parameters
-    ----------
-    hand: list of cribbage.Card
-        Exactly four cards forming a hand 
-        
-    turn_card: cribbage.Card
-        The turn card 
-    """
-
-    #if len(hand) != 4:
-    #    raise ValueError(
-    #        "To score a hand, it must have 4 cards, not {}".format(len(hand))
-    #    )
-
-    points = 0
-    points += score_fifteens(hand, turn_card)
-    points += score_sets(hand, turn_card)
-    points += score_runs(hand, turn_card)
-    points += score_flush_and_right_jack(hand, turn_card)
-
-    return points
-
-
-def score_play(plays):
-    """Score a play during counting"""
-    assert len(plays) > 1
-    return score_hand(plays[:-1], plays[-1])
-
-
 def score_fifteens(hand, turn_card):
     points = 0
     for vector_length in [2, 3, 4, 5]:
@@ -86,8 +54,39 @@ def score_runs(hand, turn_card):
     return points
 
 
+def score_hand(hand, turn_card) -> int:
+    """Score a valid cribbage hand
+    
+    Parameters
+    ----------
+    hand: list of cribbage.Card
+        Exactly four cards forming a hand 
+        
+    turn_card: cribbage.Card
+        The turn card 
+    """
+
+    #if len(hand) != 4:
+    #    raise ValueError(
+    #        "To score a hand, it must have 4 cards, not {}".format(len(hand))
+    #    )
+
+    points = 0
+    points += score_fifteens(hand, turn_card)
+    points += score_sets(hand, turn_card)
+    points += score_runs(hand, turn_card)
+    points += score_flush_and_right_jack(hand, turn_card)
+
+    return points
+
+
 def score_count(plays):
-    """Score a play vector"""
+    """Score a play vector
+    
+    Parameters
+    ----------
+    plays: list of cribbage.Card 
+    """
 
     score = 0
     if len(plays) < 2:
@@ -99,10 +98,12 @@ def score_count(plays):
 
     if plays[-1].rank == plays[-2].rank:
         score += 2
-    if len(plays) > 2 and plays[-2].rank == plays[-3].rank:
+        # two points for a pair 
+    if len(plays) > 2 and plays[-1].rank == plays[-2].rank == plays[-3].rank:
         score += 4
-    if len(plays) > 3 and plays[-2].rank == plays[-3].rank == plays[-4].rank:
+        # four more points for a total of 6 for a pair royale 
+    if len(plays) > 3 and plays[-1].rank == plays[-2].rank == plays[-3].rank == plays[-4].rank:
         score += 6
-        # hack? or does that actually make sense?
+        # 12 points total for a double pair royale 
 
     return score

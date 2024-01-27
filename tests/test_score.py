@@ -3,6 +3,7 @@ import pytest
 from cribbage.card import Deck, cards_from_str
 from cribbage.score import (
     score_hand,
+    score_count, 
     score_runs,
     score_fifteens,
     score_sets,
@@ -65,3 +66,8 @@ def test_right_jack():
 def test_perfect_hand():
     *hand, turn_card = cards_from_str("Jh 5d 5c 5s 5h")
     assert 29 == score_hand(hand, turn_card)
+
+
+def test_score_runs_examples():
+    plays = cards_from_str("3d 3s 2s")
+    assert 0 == score_count(plays) 
